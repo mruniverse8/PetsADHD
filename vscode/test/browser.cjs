@@ -87,7 +87,7 @@ const host = require("./host.cjs");
       ["duel", 28, 28],
       ["tetris", 42, 26],
       ["invaders", 68, 18],
-      ["pets", 36, 8],
+      ["pets", 80, 8],
     ]) {
       pty.select(mode);
       t.output = "";
@@ -118,9 +118,24 @@ const host = require("./host.cjs");
     await page.keyboard.press("1");
     await page.evaluate(() => window.inputDone);
     assert.equal(pty.state.mode, "pets");
+    for (const key of ["w", "w", "w", "a"]) {
+      await page.keyboard.press(key);
+      await page.evaluate(() => window.inputDone);
+    }
+    assert.equal(pty.state.weather, "sunset");
+    assert.equal(pty.state.petFire, 10);
     await page
       .locator("#terminal")
       .screenshot({ path: path.resolve("media/pets-preview.png") });
+    for (const key of ["w", "w", "w", "n"]) {
+      await page.keyboard.press(key);
+      await page.evaluate(() => window.inputDone);
+    }
+    assert.equal(pty.state.weather, "rain");
+    assert.equal(pty.state.petFire, 0);
+    await page
+      .locator("#terminal")
+      .screenshot({ path: path.resolve("media/rain-preview.png") });
     assert.deepEqual(errors, []);
     console.log(
       "PASS: xterm pixels, shared-keyboard controls, minimize/resume, stacked side layout, solo Tetris, a fire and pets",

@@ -1,6 +1,6 @@
 "use strict";
 const E = require("./media/engine");
-const sprites = require("./media/pets");
+const pets = require("./pet-scene");
 const BG = "#101725",
   FG = "#cad7e5",
   BORDER = "#536780";
@@ -160,26 +160,19 @@ function render(state, dimensions, frame = 0, suspended = false) {
   } else if (mode === "pets") {
     playable = cols >= 24 && rows >= 7;
     if (playable) {
-      const pet = sprites.art[state.pet] ? state.pet : "trex";
-      const source = sprites.art[pet];
-      const width = Math.max(...source.map((row) => row.length));
-      const art = source.map((row) => row.padEnd(width, " "));
-      const habitatWidth = 20,
-        origin = cols - habitatWidth - 1;
-      const span = habitatWidth - width;
-      const phase = Math.floor(frame / 4) % (span * 2);
-      const x = origin + Math.min(phase, span * 2 - phase);
+      const scene = pets.scene(state, cols, state.petFrame ?? frame);
       const floor = rows - 2;
-      pixels(
-        art.map((row) => [...row].map((c) => sprites.palette[c])),
-        x,
-        floor - 5,
+      pixels(scene.grid, 1, floor - 5);
+      text(
+        1,
+        floor,
+        "─".repeat(cols - 2),
+        scene.weather === "rain"
+          ? "#7ba7d5"
+          : scene.weather === "sunset"
+            ? "#ffac70"
+            : BORDER,
       );
-      const rain =
-        state.weather === "rain" ||
-        (state.weather === "auto" && frame % 180 > 110);
-      text(origin, floor, "─".repeat(habitatWidth), BORDER);
-      put(cols - 2, floor, rain ? "/" : "*", rain ? BORDER : "#eed49f");
     } else text(0, 0, "Resize: 24 cols x 7 rows");
   }
   const status = !playable
@@ -212,6 +205,8 @@ function render(state, dimensions, frame = 0, suspended = false) {
         .replace("n pet w sky ", "")
         .replace("n w ", "")
         .replace("n/w ", "");
+    if (mode === "pets")
+      choices = pets.menu(state, cols, state.petFrame ?? frame);
     text(0, rows - 1, choices, "#8bd5ef");
   }
   const lines = screen.map((row) => {

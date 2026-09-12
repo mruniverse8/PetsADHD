@@ -8,7 +8,7 @@ bottom with right alignment by default; side docking is also available.
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.5.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.6.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
 3. Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS). A terminal named **PetsADHD**
    opens at the **bottom with right alignment**, gains focus, expands for play, and starts Tetris.
@@ -55,14 +55,25 @@ Pets have a thin baseline and **one menu line**, with no separate title, status,
 or extra control rows. The arcade chooser also uses a single line:
 
 ```text
-1 Pets  2 Tetris  3 Duel  4 Invaders | n pet w sky m hide ? help
+1 Pets 2 Tetris 3 Duel 4 Invaders | a fire n pet w sky m hide ? help | trex | sunset
 ```
 
 Press **1–4** to switch directly between modes without losing game progress.
-**n** changes the pet and **w** changes the weather while pets are shown.
-Labels shorten in narrow panels; **?** shows the full controls.
+**a** makes the pet breathe animated fire. **n** changes the pet.
+**w** cycles **auto → sun → rain → sunset**. Automatic weather cycles through sun,
+sunset, and rain every 12 seconds of active pet animation. Rain has moving drops,
+clouds and puddle splashes; sunset has a warm sky, a low sun and reflections.
+The menu shows the current weather and fire controls, with shorter labels in
+narrow panels. **?** shows full controls.
 
-![Five-line pixel pet and one-line menu](media/pets-preview.png)
+Pets walk across the available terminal width, turn to face their direction,
+and animate their feet. Their sprite dimensions stay unchanged at five lines tall.
+The readable 67 always keeps its numbers upright. **m** freezes the pet's movement
+and fire effect while hidden; reopening resumes them.
+
+![Pet fire at sunset with a one-line menu](media/pets-preview.png)
+
+![Rain with moving drops and puddle splashes](media/rain-preview.png)
 
 Opening pets adjusts the bottom panel toward **8 rows**, subject to VS Code's
 minimum size and resize increments. Opening a game expands it toward **28 rows**.
@@ -114,7 +125,7 @@ Click inside the PetsADHD terminal before playing. Press **?** for control help.
 | Competitive P1 | **a/d** move, **s** soft drop, **w/g** rotate, **f** hard drop |
 | Competitive P2 | **arrows** move/rotate/soft drop, **/** reverse rotate, **Enter** hard drop |
 | Invaders | **Left/Right** or **h/l** move; **a** fires |
-| Pets | **n** cycles Rex, dog, duck, pixel 67; **w** cycles auto/sun/rain |
+| Pets | **a** breathes fire; **n** cycles Rex, dog, duck, pixel 67; **w** cycles auto/sun/rain/sunset |
 
 Two players share one keyboard, using lowercase letters for Player 1. Both get
 identical pieces and speed. Clearing 2 / 3 / 4 rows sends 1 / 2 / 4 garbage rows

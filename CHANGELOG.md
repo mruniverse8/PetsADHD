@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.6
+
+- Add animated pet fire on `a`, visible rain with drops and splashes, and sunset scenery.
+- Improve sprite shading, animate feet, and walk across the available terminal width without resizing pets.
+- Show weather and fire details in the one-line menu, with compact labels on narrow terminals.
+- Preserve pet animation and fire when hiding and reopening the panel.
+
 ## 0.3.5
 
 - Replace ASCII pets with hand-drawn pixel sprites at most five terminal lines tall.

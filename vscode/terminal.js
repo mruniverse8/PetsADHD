@@ -4,7 +4,7 @@ const { render } = require("./terminal-renderer");
 const modes = ["menu", "pets", "tetris", "duel", "invaders"];
 const help = {
   menu: "Choose 1 Pets, 2 Tetris, 3 Competitive Tetris, or 4 Invaders. Move the panel with PetsADHD: Move Game Panel.",
-  pets: "n: next pet (Rex, dog, duck, 67). w: sun/rain/auto. m: hide. Tab: menu.",
+  pets: "a: breathe fire. n: next pet (Rex, dog, duck, 67). w: auto/sun/rain/sunset. Pets walk across the terminal at a fixed size. m: hide. Tab: menu.",
   tetris:
     "Arrows or h/j/k/l: move, soft drop, rotate. z: reverse rotate. Space: hard drop. + / -: speed 1–8.",
   duel: "Shared keyboard. P1: a/d move, s down, w/g rotate, f hard drop. P2: arrows, / reverse rotate, Enter hard drop. + / - changes both speeds.",
@@ -26,6 +26,8 @@ class ArcadeTerminal {
         ? saved.pet
         : options.pet || "trex",
       weather: saved.weather || "auto",
+      petFrame: Math.max(0, Math.floor(Number(saved.petFrame) || 0)),
+      petFire: Math.max(0, Math.min(10, Number(saved.petFire) || 0)),
       musicOn: saved.musicOn ?? options.music,
     };
     // Import minimized games from the old extension without resetting a board.
@@ -138,6 +140,10 @@ class ArcadeTerminal {
     )
       return;
     this.frame++;
+    if (this.state.mode === "pets") {
+      this.state.petFrame++;
+      this.state.petFire = Math.max(0, this.state.petFire - 1);
+    }
     const s = this.current();
     if (s) {
       if (this.state.mode === "tetris") E.step(s);
@@ -201,12 +207,14 @@ class ArcadeTerminal {
     if (this.state.mode === "menu") return;
     if (key === "M") this.state.musicOn = !this.state.musicOn;
     else if (this.state.mode === "pets") {
+      if (key === "a" && this.playable) this.state.petFire = 10;
       if (key === "n") {
         const pets = ["trex", "dog", "duck", "sixseven"];
         this.state.pet = pets[(pets.indexOf(this.state.pet) + 1) % pets.length];
+        this.state.petFire = 0;
       }
       if (key === "w") {
-        const weather = ["auto", "sun", "rain"];
+        const weather = ["auto", "sun", "rain", "sunset"];
         this.state.weather =
           weather[(weather.indexOf(this.state.weather) + 1) % weather.length];
       }

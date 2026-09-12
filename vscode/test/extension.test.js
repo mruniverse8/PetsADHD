@@ -176,3 +176,27 @@ test("inline navigation selects games from pets and preserves a board through th
   p.handleInput("4");
   assert.equal(p.state.mode, "invaders");
 });
+
+test("pet fire, wider walking animation and sunset freeze on hide and survive reopening", async (t) => {
+  const h = host();
+  t.after(h.dispose);
+  h.config["panel.autoSize"] = false;
+  await h.commands["petsadhd.pets"]();
+  const p = h.terminals[0].options.pty;
+  p.handleInput("wwwa");
+  assert.equal(p.state.weather, "sunset");
+  assert.equal(p.state.petFire, 10);
+  p.tick();
+  assert.equal(p.state.petFire, 9);
+  const frame = p.state.petFrame;
+  p.handleInput("m");
+  p.tick();
+  assert.equal(p.state.petFrame, frame);
+  assert.equal(p.state.petFire, 9);
+  await h.commands["petsadhd.pets"]();
+  p.tick();
+  assert.equal(p.state.petFire, 8);
+  assert.equal(p.state.petFrame, frame + 1);
+  p.handleInput("w");
+  assert.equal(p.state.weather, "auto");
+});
