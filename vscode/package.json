@@ -2,7 +2,7 @@
   "name": "petsadhd",
   "displayName": "PetsADHD",
   "description": "Pixel pets and arcade games in a dockable VS Code terminal panel, with Tetris, shared-keyboard duels and Space Invaders.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "mruniverse8",
   "license": "MIT",
   "engines": {
@@ -104,11 +104,18 @@
           "description": "Dock position for the game terminal. Moves the entire VS Code panel, including other terminals."
         }
       }
-    }
+    },
+    "keybindings": [
+      {
+        "command": "petsadhd.pets",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p"
+      }
+    ]
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "package": "vsce package --no-dependencies --out ../dist/PetsADHD-0.3.0.vsix --baseContentUrl https://github.com/mruniverse8/PetsADHD/blob/main/vscode/ --baseImagesUrl https://raw.githubusercontent.com/mruniverse8/PetsADHD/main/vscode/"
+    "package": "vsce package --no-dependencies --out ../dist/PetsADHD-0.3.1.vsix --baseContentUrl https://github.com/mruniverse8/PetsADHD/blob/main/vscode/ --baseImagesUrl https://raw.githubusercontent.com/mruniverse8/PetsADHD/main/vscode/"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",

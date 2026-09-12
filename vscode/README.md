@@ -8,7 +8,7 @@ bottom, left, or right and drag the panel edge to resize it.
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.0.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.1.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
 3. Run **PetsADHD: Open / Resume Arcade**. A terminal named **PetsADHD** opens in the bottom panel.
 4. Press **1** for pets, **2** for Tetris, **3** for two-player Tetris, or **4** for Invaders.
@@ -17,6 +17,10 @@ You can also run **PetsADHD: Play Tetris**, **Play Competitive Tetris (2 Players
 **Play Space Invaders**, or **Show Pixel Pets** directly from the Command Palette.
 VS Code 1.85 or newer is required. The extension is distributed as a VSIX and is
 not published to the Marketplace.
+
+Press **Ctrl+Alt+P** (**Cmd+Option+P** on macOS) to open the pixel pets
+panel directly, including after minimizing it with **m**. You can customize this
+shortcut in **Keyboard Shortcuts** by searching for **PetsADHD: Show Pixel Pets**.
 
 ## Panel position and size
 

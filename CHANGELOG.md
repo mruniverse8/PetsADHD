@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Add Ctrl+Alt+P (Cmd+Option+P on macOS) to open the VS Code pixel pets panel.
+
 ## 0.3.0
 
 - Replace the VS Code webview arcade and Explorer view with a native pixel terminal panel.
