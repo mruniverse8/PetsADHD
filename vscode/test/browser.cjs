@@ -1,3 +1,5 @@
+// Visual check of the same ANSI stream used by the native VS Code terminal.
+// This harness is excluded from the VSIX; the extension never opens a browser.
 const { chromium } = require("playwright-core");
 const fs = require("node:fs"),
   os = require("node:os"),
@@ -6,71 +8,113 @@ const fs = require("node:fs"),
 const host = require("./host.cjs");
 (async () => {
   const h = host();
-  h.commands["petsadhd.open"]();
-  const dir = fs.mkdtempSync(path.join(os.homedir(), "petsadhd-webview-")),
-    file = path.join(dir, "index.html");
-  fs.writeFileSync(file, h.panels[0].webview.html);
-  const browser = await chromium.launch({
-    executablePath: process.env.PETSADHD_CHROMIUM || "/snap/bin/chromium",
-    headless: true,
-    args: ["--no-sandbox"],
-  });
+  await h.commands["petsadhd.duel"]();
+  const t = h.terminals[0],
+    pty = t.options.pty;
+  clearInterval(pty.timer);
+  const dir = fs.mkdtempSync(path.join(os.homedir(), "petsadhd-terminal-"));
+  fs.writeFileSync(
+    path.join(dir, "index.html"),
+    '<!doctype html><meta charset="utf-8"><title>PetsADHD terminal renderer test</title><style>body{background:#101725;margin:20px}#terminal{width:max-content}</style><div id="terminal"></div>',
+  );
+  let browser;
   try {
+    browser = await chromium.launch({
+      executablePath: process.env.PETSADHD_CHROMIUM || "/snap/bin/chromium",
+      headless: true,
+      args: ["--no-sandbox"],
+    });
+    const page = await browser.newPage({
+      viewport: { width: 1060, height: 650 },
+    });
     const errors = [];
-    async function page(saved) {
-      const p = await browser.newPage({
-        viewport: { width: 1100, height: 850 },
+    page.on("pageerror", (e) => errors.push(e.message));
+    await page.exposeFunction("input", (data) => {
+      t.output = "";
+      pty.handleInput(data);
+      return t.output;
+    });
+    await page.goto("file://" + path.join(dir, "index.html"));
+    await page.addStyleTag({
+      path: require.resolve("@xterm/xterm/css/xterm.css"),
+    });
+    await page.addScriptTag({ path: require.resolve("@xterm/xterm") });
+    await page.evaluate(() => {
+      window.term = new Terminal({
+        cols: 90,
+        rows: 30,
+        fontSize: 17,
+        fontFamily: "monospace",
+        theme: { background: "#101725", foreground: "#cad7e5" },
       });
-      p.on("pageerror", (e) => errors.push(e.message));
-      await p.addInitScript((value) => {
-        window.__saved = value;
-        window.__messages = [];
-        window.acquireVsCodeApi = () => ({
-          getState: () => window.__saved,
-          setState: (s) => (window.__saved = s),
-          postMessage: (m) => window.__messages.push(m),
-        });
-      }, saved);
-      await p.goto("file://" + file);
-      return p;
+      term.open(document.querySelector("#terminal"));
+      term.onData((data) => {
+        window.inputDone = window
+          .input(data)
+          .then(
+            (output) => new Promise((resolve) => term.write(output, resolve)),
+          );
+      });
+      term.focus();
+    });
+    await page.evaluate(
+      (output) => new Promise((resolve) => term.write(output, resolve)),
+      t.output,
+    );
+    for (const key of ["f", "Enter", "ArrowLeft", "+"]) {
+      await page.keyboard.press(key);
+      await page.evaluate(() => window.inputDone);
     }
-    let p = await page(null);
-    await p.locator('[data-mode="tetris"]').click();
-    await p.locator("#speed").selectOption("8");
-    await p.locator("#screen").press("Space");
-    const before = await p.evaluate(() => window.__saved.games.tetris.locks);
-    assert.equal(before, 1);
-    await p.locator("#screen").press("m");
-    const saved = await p.evaluate(
-      () => window.__messages.findLast((m) => m.type === "minimize").state,
+    assert.deepEqual(
+      pty.current().players.map((p) => [p.locks, p.speed]),
+      [
+        [1, 2],
+        [1, 2],
+      ],
     );
-    assert.ok(saved.games.tetris.hidden);
-    await p.close();
-    p = await page(saved);
-    assert.equal(await p.locator("#speed").inputValue(), "8");
-    await p.locator("#screen").press("p");
-    const after = await p.evaluate(() => window.__saved.games.tetris);
-    assert.equal(after.locks, 1);
-    await p.locator('[data-mode="duel"]').click();
-    await p.locator("#screen").press("f");
-    await p.locator("#screen").press("Enter");
-    const duel = await p.evaluate(() => window.__saved.games.duel);
-    assert.equal(duel.players[0].locks, 1);
-    assert.equal(duel.players[1].locks, 1);
-    await p.screenshot({ path: path.resolve("media/preview.png") });
-    await p.locator('[data-mode="invaders"]').click();
-    await p.locator("#screen").press("a");
-    assert.ok(
-      (await p.evaluate(() => window.__saved.games.invaders.shots.length)) > 0,
-    );
-    await p.setViewportSize({ width: 420, height: 700 });
-    assert.ok((await p.locator("#screen").boundingBox()).width < 420);
+    await page
+      .locator("#terminal")
+      .screenshot({ path: path.resolve("media/preview.png") });
+    const saved = structuredClone(pty.current());
+    await page.keyboard.press("m");
+    await page.evaluate(() => window.inputDone);
+    pty.tick();
+    assert.deepEqual(pty.current(), saved);
+    await h.commands["petsadhd.open"]();
+    assert.deepEqual(pty.current(), saved);
+    for (const [mode, columns, rows] of [
+      ["duel", 28, 28],
+      ["tetris", 42, 26],
+      ["invaders", 68, 18],
+      ["pets", 36, 20],
+    ]) {
+      pty.select(mode);
+      t.output = "";
+      pty.setDimensions({ columns, rows });
+      assert.ok(pty.playable);
+      await page.evaluate(
+        ({ output, columns, rows }) => {
+          term.resize(columns, rows);
+          return new Promise((resolve) => term.write(output, resolve));
+        },
+        { output: t.output, columns, rows },
+      );
+      if (mode === "invaders") {
+        await page.keyboard.press("a");
+        await page.evaluate(() => window.inputDone);
+        assert.equal(pty.current().shots.length, 1);
+      }
+      await page
+        .locator("#terminal")
+        .screenshot({ path: `/tmp/petsadhd-${mode}-terminal.png` });
+    }
     assert.deepEqual(errors, []);
     console.log(
-      "PASS: actual Chromium webview, both player controls, speed, saved-state resume, shooting and responsive canvas",
+      "PASS: xterm pixels, shared-keyboard controls, minimize/resume, stacked side layout, solo Tetris, a fire and pets",
     );
   } finally {
-    await browser.close();
+    h.dispose();
+    await browser?.close();
     fs.rmSync(dir, { recursive: true, force: true });
   }
 })().catch((error) => {

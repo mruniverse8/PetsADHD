@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Replace the VS Code webview arcade and Explorer view with a native pixel terminal panel.
+- Add bottom/left/right docking, compact and large Tetris pixels, and stacked two-player boards for narrow panels.
+- Preserve each game while minimizing, switching modes, resizing, and reopening; import existing saved games.
+- Keep shared-keyboard competition, adjustable speed, `a` to fire, and the requested Tetris soundtrack.
+- Test terminal lifecycle, keyboard input and ANSI output with xterm; remove the browser game frontend.
+
 ## 0.2.1
 
 - Set the requested oor2uIqys8M soundtrack as the Tetris and competitive Tetris default.

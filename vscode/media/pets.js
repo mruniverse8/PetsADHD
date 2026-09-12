@@ -1,4 +1,4 @@
-globalThis.PetsSprites = {
+module.exports = {
   art: {
     dog: [
       "              ddd     ",

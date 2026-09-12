@@ -1,86 +1,111 @@
-const Module = require("node:module"),
-  path = require("node:path"),
-  { pathToFileURL } = require("node:url");
-module.exports = function host() {
+const Module = require("node:module");
+class EventEmitter {
+  listeners = new Set();
+  event = (fn) => {
+    this.listeners.add(fn);
+    return { dispose: () => this.listeners.delete(fn) };
+  };
+  fire(value) {
+    for (const fn of this.listeners) fn(value);
+  }
+  dispose() {
+    this.listeners.clear();
+  }
+}
+module.exports = function host(saved) {
   const commands = {},
-    storage = new Map(),
-    global = new Map(),
-    panels = [],
-    providers = {},
-    serializers = {};
-  const state = (map) => ({
-    get: (key, fallback) => (map.has(key) ? map.get(key) : fallback),
-    update: async (key, value) => {
-      map.set(key, value);
-    },
-  });
+    storage = new Map(saved ? [["arcade", saved]] : []),
+    terminals = [],
+    executed = [],
+    tracks = [];
+  const active = new EventEmitter(),
+    editor = new EventEmitter(),
+    focus = new EventEmitter(),
+    configuration = new EventEmitter();
   const config = {
-    "music.enabled": false,
+    "music.enabled": true,
     "music.url": "https://www.youtube.com/watch?v=z0FRc-51_V4",
     "music.volume": 25,
     "tetris.speed": 1,
   };
-  const api = {
-    workspace: {
-      isTrusted: true,
-      getConfiguration: () => ({
-        get: (key, fallback) => config[key] ?? fallback,
-      }),
+  const state = (map) => ({
+    get: (key, fallback) => map.get(key) ?? fallback,
+    update: async (key, value) => {
+      map.set(key, structuredClone(value));
     },
-    Uri: { joinPath: (base, ...parts) => path.join(base, ...parts) },
-    ViewColumn: { Active: 1 },
+  });
+  const api = {
+    EventEmitter,
+    ThemeIcon: class {
+      constructor(id) {
+        this.id = id;
+      }
+    },
+    TerminalLocation: { Panel: 1 },
+    ConfigurationTarget: { Global: 1 },
     commands: {
       registerCommand: (name, callback) => {
         commands[name] = callback;
         return { dispose() {} };
       },
+      executeCommand: async (name) => {
+        executed.push(name);
+      },
+    },
+    workspace: {
+      isTrusted: true,
+      getConfiguration: () => ({
+        get: (key, fallback) => config[key] ?? fallback,
+        update: async (key, value) => {
+          config[key] = value;
+        },
+      }),
+      onDidChangeConfiguration: configuration.event,
     },
     window: {
+      activeTerminal: undefined,
       showWarningMessage: () => {},
-      registerWebviewViewProvider: (name, value) => {
-        providers[name] = value;
-        return { dispose() {} };
-      },
-      registerWebviewPanelSerializer: (name, value) => {
-        serializers[name] = value;
-        return { dispose() {} };
-      },
-      createWebviewPanel: () => {
-        const panel = {
-          visible: true,
-          webview: {
-            cspSource: "file:",
-            asWebviewUri: (p) => pathToFileURL(p).href,
-            onDidReceiveMessage: (fn) => {
-              panel.receive = fn;
-            },
-            postMessage: async (message) => {
-              panel.message = message;
-            },
-          },
-          onDidDispose: (fn) => (panel.disposeCallback = fn),
-          onDidChangeViewState: (fn) => (panel.viewCallback = fn),
-          reveal() {
+      showInformationMessage: () => {},
+      showQuickPick: async () => "Right",
+      onDidChangeActiveTerminal: active.event,
+      onDidChangeActiveTextEditor: editor.event,
+      onDidChangeWindowState: focus.event,
+      createTerminal(options) {
+        const t = {
+          options,
+          output: "",
+          visible: false,
+          show() {
             this.visible = true;
+            api.window.activeTerminal = this;
+            if (!this.opened) {
+              this.opened = true;
+              options.pty.open({ columns: 90, rows: 30 });
+            }
+            active.fire(this);
+          },
+          hide() {
+            this.visible = false;
           },
           dispose() {
-            this.visible = false;
             this.disposed = true;
-            this.disposeCallback?.();
+            this.visible = false;
+            options.pty.close();
           },
         };
-        panels.push(panel);
-        return panel;
+        options.pty.onDidWrite((data) => {
+          t.output += data;
+        });
+        terminals.push(t);
+        return t;
       },
     },
   };
-  const ctx = {
+  const context = {
     subscriptions: [],
-    extensionUri: path.resolve(__dirname, ".."),
     workspaceState: state(storage),
-    globalState: state(global),
+    globalState: state(new Map()),
   };
-  const tracks = [];
   class MockMusic {
     constructor(config) {
       this.config = config;
@@ -91,7 +116,9 @@ module.exports = function host() {
     stop() {
       tracks.push("stop");
     }
-    pause() {}
+    pause(value) {
+      tracks.push(value ? "pause" : "resume");
+    }
   }
   const load = Module._load;
   Module._load = function (name, ...args) {
@@ -100,17 +127,22 @@ module.exports = function host() {
   };
   delete require.cache[require.resolve("../extension")];
   try {
-    require("../extension").activate(ctx);
+    require("../extension").activate(context);
   } finally {
     Module._load = load;
   }
   return {
     commands,
-    panels,
+    terminals,
     storage,
-    providers,
-    serializers,
     tracks,
-    context: ctx,
+    executed,
+    config,
+    api,
+    active,
+    editor,
+    focus,
+    context,
+    dispose: () => context.subscriptions.forEach((d) => d.dispose()),
   };
 };
