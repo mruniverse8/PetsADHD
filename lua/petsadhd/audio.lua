@@ -1,6 +1,6 @@
 -- Stream the requested track through ffplay; own every child process we start.
 local M = {}
-M.url = "https://www.youtube.com/watch?v=oor2uIqys8M"
+M.url = "https://www.youtube.com/watch?v=5vaaOqLHxrE"
 
 function M.new(opts)
   opts = opts or {}

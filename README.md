@@ -13,7 +13,7 @@ pane. **1–4** selects pets, Tetris, two-player Tetris or Invaders. Games expan
 pane, and returning to pets restores its small height. Requires **Node.js 18+**
 on PATH; no npm install is needed.
 
-**VS Code:** [download the VSIX](dist/PetsADHD-0.3.10.vsix), then run **Extensions:
+**VS Code:** [download the VSIX](dist/PetsADHD-0.3.11.vsix), then run **Extensions:
 Install from VSIX**. Games run as pixel graphics in the integrated Terminal panel.
 Use **PetsADHD: Move Game Panel** to choose Bottom Right, Bottom, Left, or Right.
 Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS) to open or resume a game

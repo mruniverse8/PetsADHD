@@ -1,7 +1,7 @@
 -- Astra Tetris: a ten-column board, seven-piece bag, and falling pixel blocks.
 local M = {}
 local ready, view
-M.music_url = "https://www.youtube.com/watch?v=oor2uIqys8M"
+M.music_url = "https://www.youtube.com/watch?v=5vaaOqLHxrE"
 
 function M.music_options(opts)
   return vim.tbl_extend("force", { enabled = opts ~= false, url = M.music_url }, type(opts) == "table" and opts or {})

@@ -55,7 +55,7 @@ assert(state().pixelSize == 1 and state().weather == "sunset", "small pixels and
 eventually(function()
   return #sounds > 0 and sounds[#sounds].started
 end, "pet music starts by default")
-assert(sounds[#sounds].opts.url == "https://www.youtube.com/watch?v=oor2uIqys8M", "requested default pet soundtrack")
+assert(sounds[#sounds].opts.url == "https://www.youtube.com/watch?v=5vaaOqLHxrE", "requested default pet soundtrack")
 assert(
   table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false)):find("▀", 1, true),
   "actual terminal displays colored half-block pixels"
@@ -104,7 +104,7 @@ end, "games expand the pane")
 eventually(function()
   return #sounds > 0 and sounds[#sounds].started
 end, "Tetris soundtrack starts")
-assert(sounds[#sounds].opts.url == "https://www.youtube.com/watch?v=oor2uIqys8M", "requested Tetris soundtrack")
+assert(sounds[#sounds].opts.url == "https://www.youtube.com/watch?v=5vaaOqLHxrE", "requested Tetris soundtrack")
 vim.api.nvim_set_current_win(editor)
 eventually(function()
   return sounds[#sounds].paused

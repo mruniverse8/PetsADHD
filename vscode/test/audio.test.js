@@ -14,7 +14,7 @@ test("audio cancellation cannot create an orphan player and pause owns its signa
     return p;
   }
   const music = new Music(
-    () => ({ url: "https://www.youtube.com/watch?v=oor2uIqys8M", volume: 25 }),
+    () => ({ url: "https://www.youtube.com/watch?v=5vaaOqLHxrE", volume: 25 }),
     () => {},
     launch,
   );

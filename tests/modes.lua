@@ -95,7 +95,7 @@ for _, command in ipairs({ "Tetris", "TetrisDuel", "SpaceInvaders" }) do
   vim.cmd(command)
   if command ~= "SpaceInvaders" then
     assert(
-      audio[#audio].options.url == "https://www.youtube.com/watch?v=oor2uIqys8M",
+      audio[#audio].options.url == "https://www.youtube.com/watch?v=5vaaOqLHxrE",
       "both Tetris modes use the requested default soundtrack"
     )
   else

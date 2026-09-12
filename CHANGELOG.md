@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.11
+
+- Replace the default soundtrack for pets and every game in both editors with the newly requested track.
+- Keep soundtrack customization instructions in the README without identifying the default song.
+
 ## 0.3.10
 
 - Use the same default music for pets, Tetris, competitive Tetris and Invaders in VS Code and Neovim.

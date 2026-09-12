@@ -16,16 +16,16 @@ function activate(context) {
         musicMode === "pets"
           ? setting().get(
               "pets.musicUrl",
-              "https://www.youtube.com/watch?v=oor2uIqys8M",
+              "https://www.youtube.com/watch?v=5vaaOqLHxrE",
             )
           : musicMode === "tetris"
             ? setting().get(
                 "tetris.musicUrl",
-                "https://www.youtube.com/watch?v=oor2uIqys8M",
+                "https://www.youtube.com/watch?v=5vaaOqLHxrE",
               )
             : setting().get(
                 "music.url",
-                "https://www.youtube.com/watch?v=oor2uIqys8M",
+                "https://www.youtube.com/watch?v=5vaaOqLHxrE",
               ),
       volume: setting().get("music.volume", 25),
       extractor: setting().get("music.extractor", ""),

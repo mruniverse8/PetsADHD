@@ -10,11 +10,11 @@ test("pet music defaults, toggle, minimize/resume, custom track and workspace tr
   h.config["panel.autoSize"] = false;
   await h.commands["petsadhd.pets"]();
   const p = h.terminals[0].options.pty;
-  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=oor2uIqys8M");
+  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=5vaaOqLHxrE");
   p.handleInput("m");
   assert.equal(h.tracks.at(-1), "pause");
   await h.commands["petsadhd.pets"]();
-  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=oor2uIqys8M");
+  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=5vaaOqLHxrE");
   p.handleInput("M");
   assert.equal(p.state.musicOn, false);
   assert.equal(h.tracks.at(-1), "stop");
@@ -70,7 +70,7 @@ test("resize and focus pause simulation; fragmented arrows, a fire, tracks and e
   delete h.config["music.url"]; // Exercise the extension's default fallback.
   await h.commands["petsadhd.tetris"]();
   const p = h.terminals[0].options.pty;
-  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=oor2uIqys8M");
+  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=5vaaOqLHxrE");
   const x = p.current().piece.x;
   p.handleInput("\x1b[");
   assert.equal(p.current().piece.x, x);
@@ -94,7 +94,7 @@ test("resize and focus pause simulation; fragmented arrows, a fire, tracks and e
   await h.commands["petsadhd.open"]();
   assert.equal(p.current().paused, true);
   await h.commands["petsadhd.invaders"]();
-  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=oor2uIqys8M");
+  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=5vaaOqLHxrE");
   p.handleInput("a");
   assert.equal(p.current().shots.length, 1);
   p.handleInput("q");
