@@ -33,23 +33,29 @@ function M.attach_snacks()
 end
 
 function M.open()
-  vim.ui.select({ "Tetris", "Space Invaders", "Choose pet", "Toggle pets" }, { prompt = "PetsADHD" }, function(choice)
-    if choice == "Tetris" then
-      require("petsadhd.tetris").open()
-    elseif choice == "Space Invaders" then
-      require("petsadhd.invaders").open()
-    elseif choice == "Toggle pets" then
-      vim.cmd("PetToggle")
-    elseif choice == "Choose pet" then
-      vim.ui.select({ "trex", "dog", "duck", "sixseven" }, { prompt = "Companion" }, function(kind)
-        if kind then
-          local pets = require("petsadhd.pets")
-          pets.select(kind)
-          pets.set(true, true)
-        end
-      end)
+  vim.ui.select(
+    { "Tetris", "Competitive Tetris (2 players)", "Space Invaders", "Choose pet", "Toggle pets" },
+    { prompt = "PetsADHD" },
+    function(choice)
+      if choice == "Tetris" then
+        require("petsadhd.tetris").open()
+      elseif choice == "Competitive Tetris (2 players)" then
+        require("petsadhd.duel").open()
+      elseif choice == "Space Invaders" then
+        require("petsadhd.invaders").open()
+      elseif choice == "Toggle pets" then
+        vim.cmd("PetToggle")
+      elseif choice == "Choose pet" then
+        vim.ui.select({ "trex", "dog", "duck", "sixseven" }, { prompt = "Companion" }, function(kind)
+          if kind then
+            local pets = require("petsadhd.pets")
+            pets.select(kind)
+            pets.set(true, true)
+          end
+        end)
+      end
     end
-  end)
+  )
 end
 
 function M.setup(opts)
@@ -62,7 +68,10 @@ function M.setup(opts)
   end
   ready = true
   require("petsadhd.pets").setup(vim.tbl_extend("force", { keymaps = opts.keymaps ~= false }, opts.pets or {}))
-  require("petsadhd.tetris").setup({ keymaps = opts.keymaps ~= false })
+  require("petsadhd.tetris").setup(
+    vim.tbl_extend("force", { keymaps = opts.keymaps ~= false, music = opts.music }, opts.tetris or {})
+  )
+  require("petsadhd.duel").setup(vim.tbl_extend("force", { music = opts.music }, opts.tetris or {}))
   require("petsadhd.invaders").setup({ keymaps = opts.keymaps ~= false, music = opts.music })
   if opts.snacks ~= false then
     M.attach_snacks()

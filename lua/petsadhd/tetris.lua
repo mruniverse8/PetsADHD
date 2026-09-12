@@ -1,7 +1,6 @@
 -- Astra Tetris: a ten-column board, seven-piece bag, and falling pixel blocks.
 local M = {}
-local active, ready
-local ns = vim.api.nvim_create_namespace("AstraGame")
+local ready, view
 local shapes = {
   I = { "    ", "IIII", "    ", "    " },
   O = { "OO", "OO" },
@@ -35,7 +34,8 @@ local function take(s)
   if #s.bag == 0 then
     s.bag = { "I", "O", "T", "S", "Z", "J", "L" }
     for i = #s.bag, 2, -1 do
-      local j = math.random(i)
+      s.seed = (s.seed * 16807) % 2147483647
+      local j = 1 + s.seed % i
       s.bag[i], s.bag[j] = s.bag[j], s.bag[i]
     end
   end
@@ -52,8 +52,23 @@ local function spawn(s)
   end
 end
 
-function M.new()
-  local s = { width = 10, height = 20, board = {}, bag = {}, score = 0, lines = 0, level = 1, tick = 0 }
+function M.new(opts)
+  opts = opts or {}
+  local s = {
+    width = 10,
+    height = 20,
+    board = {},
+    bag = {},
+    score = 0,
+    lines = 0,
+    level = 1,
+    tick = 0,
+    speed = math.max(1, math.min(8, math.floor(opts.speed or 1))),
+    seed = opts.seed or math.random(1, 2147483646),
+    pending = 0,
+    attack = 0,
+    locks = 0,
+  }
   for y = 1, s.height do
     s.board[y] = {}
   end
@@ -95,7 +110,28 @@ local function lock(s)
   s.score = s.score + ({ [0] = 0, 100, 300, 500, 800 })[cleared] * s.level
   s.lines = s.lines + cleared
   s.level = 1 + math.floor(s.lines / 10)
-  spawn(s)
+  s.locks = s.locks + 1
+  local attack = ({ [0] = 0, 0, 1, 2, 4 })[cleared]
+  local cancelled = math.min(attack, s.pending)
+  s.attack, s.pending = s.attack + attack - cancelled, s.pending - cancelled
+  for _ = 1, s.pending do
+    if next(s.board[1]) then
+      s.over = true
+      break
+    end
+    table.remove(s.board, 1)
+    local row, hole = {}, 1 + (s.locks * 7) % s.width
+    for x = 1, s.width do
+      if x ~= hole then
+        row[x] = "Garbage"
+      end
+    end
+    s.board[#s.board + 1] = row
+  end
+  s.pending = 0
+  if not s.over then
+    spawn(s)
+  end
 end
 
 local function rotate(s, clockwise)
@@ -120,6 +156,10 @@ end
 
 function M.input(s, key)
   if s.over then
+    return
+  end
+  if key == "faster" or key == "slower" then
+    s.speed = math.max(1, math.min(8, s.speed + (key == "faster" and 1 or -1)))
     return
   end
   if key == "p" then
@@ -157,7 +197,7 @@ function M.step(s)
     return
   end
   s.tick = s.tick + 1
-  if s.tick >= math.max(1, 9 - s.level) then
+  if s.tick >= math.max(1, (9 - s.level) / s.speed) then
     s.tick = 0
     if not move(s, 0, 1) then
       lock(s)
@@ -183,6 +223,7 @@ function M.render(s)
     [1] = "Score  " .. s.score,
     [2] = "Lines  " .. s.lines,
     [3] = "Level  " .. s.level,
+    [4] = "Speed  " .. s.speed .. "x (+/-)",
     [5] = "Next: " .. s.next,
     [11] = "h/l  Left / right",
     [12] = "j    Soft drop",
@@ -190,7 +231,8 @@ function M.render(s)
     [14] = "z    Rotate counterclockwise",
     [15] = "Space  Hard drop",
     [17] = "p Pause   r Restart",
-    [18] = "q / Esc   Close",
+    [18] = "m Minimize   M Music",
+    [19] = "q / Esc   Quit",
     [20] = "Arrows also work",
   }
   for y, row in ipairs(shapes[s.next]) do
@@ -218,146 +260,18 @@ function M.render(s)
   return lines, spans
 end
 
-function M.close()
-  local session = active
-  active = nil
-  if not session then
-    return
-  end
-  session.timer:stop()
-  session.timer:close()
-  if vim.api.nvim_win_is_valid(session.win) then
-    vim.api.nvim_win_close(session.win, true)
-  end
-  if vim.api.nvim_buf_is_valid(session.buf) then
-    vim.api.nvim_buf_delete(session.buf, { force = true })
-  end
-end
-
-local function draw(session)
-  if active ~= session or not vim.api.nvim_win_is_valid(session.win) then
-    return
-  end
-  local lines, spans = M.render(session.state)
-  vim.bo[session.buf].modifiable = true
-  vim.api.nvim_buf_set_lines(session.buf, 0, -1, false, lines)
-  vim.bo[session.buf].modifiable = false
-  vim.api.nvim_buf_clear_namespace(session.buf, ns, 0, -1)
-  for _, span in ipairs(spans) do
-    vim.api.nvim_buf_set_extmark(session.buf, ns, span[1], span[2], { end_col = span[2] + 2, hl_group = span[3] })
-  end
-  vim.api.nvim_win_set_cursor(session.win, { 1, 0 })
-end
-
-local function geometry()
-  local width, height = 54, 24
-  if vim.o.columns < width + 4 or vim.o.lines - vim.o.cmdheight < height + 4 then
-    return
-  end
-  return {
-    relative = "editor",
-    width = width,
-    height = height,
-    row = math.floor((vim.o.lines - height - 2) / 2),
-    col = math.floor((vim.o.columns - width - 2) / 2),
-    style = "minimal",
-    border = "rounded",
-    title = " Astra Tetris ",
-    title_pos = "center",
-  }
-end
-
 function M.open()
-  if active and vim.api.nvim_win_is_valid(active.win) then
-    vim.api.nvim_set_current_win(active.win)
-    return
+  view.open()
+end
+function M.close()
+  if view then
+    view.close()
   end
-  local config = geometry()
-  if not config then
-    vim.notify("Astra needs a terminal at least 58 columns by 29 rows.", vim.log.levels.INFO)
-    return
+end
+function M.minimize()
+  if view then
+    view.minimize()
   end
-  M.close()
-  local b = vim.api.nvim_create_buf(false, true)
-  vim.bo[b].bufhidden, vim.bo[b].swapfile, vim.bo[b].undolevels = "wipe", false, -1
-  vim.bo[b].filetype = "astra"
-  local session = {
-    buf = b,
-    win = vim.api.nvim_open_win(b, true, config),
-    timer = assert(vim.uv.new_timer()),
-    state = M.new(),
-  }
-  active = session
-  vim.wo[session.win].wrap = false
-  vim.wo[session.win].winhighlight = "Normal:AstraBackground,NormalFloat:AstraBackground"
-  local function bind(keys, action)
-    for _, key in ipairs(keys) do
-      vim.keymap.set("n", key, function()
-        if active == session then
-          action()
-        end
-      end, { buffer = b, nowait = true, silent = true })
-    end
-  end
-  for key, arrow in pairs({ h = "<Left>", j = "<Down>", k = "<Up>", l = "<Right>" }) do
-    bind({ key, arrow }, function()
-      M.input(session.state, key)
-      draw(session)
-    end)
-  end
-  for key, action in pairs({ ["<Space>"] = "drop", x = "x", z = "z", p = "p" }) do
-    bind({ key }, function()
-      M.input(session.state, action)
-      draw(session)
-    end)
-  end
-  bind({ "q", "<Esc>" }, M.close)
-  bind({ "r" }, function()
-    session.state = M.new()
-    draw(session)
-  end)
-  -- Keep editing commands out of the scratch game.
-  bind({ "i", "a", "I", "A", "o", "O", "R", "v", "V", "<C-v>", "s", "S", "c", "C", "d" }, function() end)
-  vim.api.nvim_create_autocmd("BufLeave", {
-    buffer = b,
-    callback = function()
-      if active == session then
-        session.state.paused = true
-        draw(session)
-      end
-    end,
-  })
-  vim.api.nvim_create_autocmd("BufWipeout", {
-    buffer = b,
-    once = true,
-    callback = function()
-      if active == session then
-        vim.schedule(function()
-          if active == session then
-            M.close()
-          end
-        end)
-      end
-    end,
-  })
-  session.timer:start(
-    100,
-    100,
-    vim.schedule_wrap(function()
-      if active ~= session then
-        return
-      end
-      if not vim.api.nvim_win_is_valid(session.win) then
-        M.close()
-        return
-      end
-      if vim.api.nvim_get_current_win() == session.win and vim.api.nvim_get_mode().mode == "n" then
-        M.step(session.state)
-        draw(session)
-      end
-    end)
-  )
-  draw(session)
 end
 
 function M.setup(opts)
@@ -365,6 +279,43 @@ function M.setup(opts)
     return
   end
   ready = true
+  opts = opts or {}
+  view = require("petsadhd.window").new({
+    name = "AstraGame",
+    title = "Astra Tetris",
+    filetype = "astra",
+    background = "AstraBackground",
+    width = 54,
+    height = 24,
+    cell_width = 2,
+    music = opts.music,
+    render = M.render,
+    step = M.step,
+    input = M.input,
+    new = function()
+      return M.new({ speed = opts.speed })
+    end,
+    restart = function(s)
+      return M.new({ speed = s.speed })
+    end,
+    keys = {
+      h = "h",
+      l = "l",
+      j = "j",
+      k = "k",
+      x = "x",
+      z = "z",
+      p = "p",
+      ["<Left>"] = "h",
+      ["<Right>"] = "l",
+      ["<Up>"] = "k",
+      ["<Down>"] = "j",
+      ["<Space>"] = "drop",
+      ["+"] = "faster",
+      ["="] = "faster",
+      ["-"] = "slower",
+    },
+  })
   local group = vim.api.nvim_create_augroup("AstraGame", { clear = true })
   local function colors()
     vim.api.nvim_set_hl(0, "AstraBackground", { fg = "#c6d0f5", bg = "#171b2c" })
@@ -376,6 +327,7 @@ function M.setup(opts)
       Z = "#ed8796",
       J = "#8aadf4",
       L = "#f5a97f",
+      Garbage = "#6e789e",
     }) do
       vim.api.nvim_set_hl(0, "Astra" .. kind, { fg = "#171b2c", bg = color, bold = true })
     end
@@ -383,39 +335,11 @@ function M.setup(opts)
   end
   colors()
   vim.api.nvim_create_autocmd("ColorScheme", { group = group, callback = colors })
-  vim.api.nvim_create_autocmd("FocusLost", {
-    group = group,
-    callback = function()
-      if active then
-        active.state.paused = true
-        draw(active)
-      end
-    end,
-  })
-  vim.api.nvim_create_autocmd("VimResized", {
-    group = group,
-    callback = function()
-      if not active then
-        return
-      end
-      local config = geometry()
-      if not config then
-        M.close()
-        vim.notify("Astra closed because the terminal became too small.", vim.log.levels.INFO)
-        return
-      end
-      config.col = math.floor((vim.o.columns - config.width - 2) / 2)
-      config.row = math.floor((vim.o.lines - config.height - 2) / 2)
-      vim.api.nvim_win_set_config(active.win, config)
-    end,
-  })
-  vim.api.nvim_create_autocmd("VimLeavePre", { group = group, callback = M.close })
-  vim.api.nvim_create_user_command("AstraGame", M.open, { desc = "Play Astra Tetris" })
-  vim.api.nvim_create_user_command("PetGame", M.open, { desc = "Play Astra Tetris" })
-  vim.api.nvim_create_user_command("Tetris", M.open, { desc = "Play Astra Tetris" })
-  if not opts or opts.keymaps ~= false then
+  for _, name in ipairs({ "Tetris", "AstraGame", "PetGame" }) do
+    vim.api.nvim_create_user_command(name, M.open, { desc = "Play or resume Astra Tetris" })
+  end
+  if opts.keymaps ~= false then
     vim.keymap.set("n", "<leader>uA", M.open, { desc = "Play Astra Tetris" })
   end
 end
-
 return M

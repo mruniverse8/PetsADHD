@@ -1,7 +1,11 @@
 # PetsADHD
 
-Pixel pets and a tiny arcade for Neovim and LazyVim. One plugin contains animated
-sidebar companions, Astra Tetris, and Space Invaders with optional music.
+Pixel pets and a tiny arcade for **Neovim / LazyVim and VS Code**. Includes animated
+sidebar companions, Astra Tetris, shared-keyboard competitive Tetris, and Space
+Invaders with optional music.
+
+**VS Code:** [download the VSIX](dist/PetsADHD-0.2.0.vsix), then run **Extensions:
+Install from VSIX**. See [VS Code instructions](vscode/README.md).
 
 - **Pets:** a T-rex, dog, duck, and readable pixel “67”, with two sizes and sun/rain.
 - **Tetris:** seven-piece bags, rotation, ghost landing guide, next-piece preview,
@@ -27,7 +31,7 @@ After publishing, create `~/.config/nvim/lua/plugins/petsadhd.lua`:
 ```lua
 return {
   {
-    "YOUR_GITHUB_USERNAME/PetsADHD",
+    "mruniverse8/PetsADHD",
     name = "PetsADHD",
     main = "petsadhd",
     lazy = false,
@@ -37,7 +41,7 @@ return {
 }
 ```
 
-Replace `YOUR_GITHUB_USERNAME` with your account. The plugin adds a reserved
+The plugin adds a reserved
 footer to the left Snacks explorer, preserving an existing layout callback.
 Neo-tree pets use empty rows below the file list.
 
@@ -62,7 +66,8 @@ commands and the layout integration. Restart Neovim after switching.
 | `:PetSmall`, `:PetBig` | Set pet size |
 | `:PetWeather auto`, `sun`, or `rain` | Set habitat weather |
 | `:Tetris`, `:AstraGame`, `:PetGame` | Open Astra Tetris |
-| `:SpaceInvaders` | Open Space Invaders |
+| `:SpaceInvaders` | Open or resume Space Invaders |
+| `:TetrisDuel`, `:Tetris2P` | Open or resume shared-keyboard competitive Tetris |
 
 Default shortcuts: `<leader>uP` toggles pets, `<leader>uA` opens Tetris, and
 `<leader>uI` opens Invaders. Game controls are local to their scratch buffers.
@@ -70,13 +75,25 @@ Default shortcuts: `<leader>uP` toggles pets, `<leader>uA` opens Tetris, and
 | Game | Controls |
 | --- | --- |
 | Tetris | `h/l` or Left/Right move; `j` or Down soft drops; `k/x` or Up rotates clockwise; `z` rotates counterclockwise; Space hard drops |
-| Invaders | `h/l` or Left/Right move; **a fires**; **m toggles music** |
-| Both | `p` pauses, `r` restarts, `q` or Escape closes |
+| Invaders | `h/l` or Left/Right move; **a fires**; **M toggles music** |
+| All games | **m minimizes**, **M toggles music**, `p` pauses, `r` restarts, `q` or Escape quits |
+| Competitive Tetris | P1: `a/d` move, `s` soft drop, `w/g` rotate, `f` hard drop. P2: arrows move/rotate/drop, `/` reverse rotate, Enter hard drop |
+| Tetris speed | `+` / `=` faster, `-` slower, from 1× to 8× |
 
 Leaving a game or switching applications pauses it. Press `p` to resume.
-Tetris needs 58 columns and 29 rows with a one-row command line; shrinking below
-its required size closes it. Invaders needs 40 columns and 19 rows; smaller
+**m** hides the window and preserves the board, score, piece sequence, and music
+position in the current Neovim process. Run the same game command to resume.
+Opening a different game minimizes the previous one. **r** starts over; **q**
+discards that game. Neovim shutdown clears games held in memory.
+
+Tetris needs 58 columns and 29 rows; competitive mode needs 84 columns and 31
+rows with a one-row command line. Invaders needs 40 columns and 19 rows. Smaller
 terminals suspend the game until you enlarge the terminal and press `p`.
+
+In competitive mode both players get identical seven-piece bags and the same
+speed. Clearing 2 / 3 / 4 lines sends 1 / 2 / 4 garbage rows to the opponent.
+Incoming garbage applies after the next piece locks; line clears can cancel it.
+The first player to top out loses. `+` / `-` changes both players' speed equally.
 
 ## Options
 
@@ -92,6 +109,7 @@ opts = {
     -- weather = "auto",  -- auto, sun, rain
     -- state_file = vim.fn.stdpath("state") .. "/petsadhd/pets-state",
   },
+  tetris = { speed = 1 }, -- initial speed, 1–8
   music = {
     enabled = true,
     url = "https://www.youtube.com/watch?v=z0FRc-51_V4",
@@ -102,7 +120,7 @@ opts = {
 }
 ```
 
-Use `music = false` to start Invaders muted. `m` can enable it for the current
+Use `music = false` to start games muted. `M` can enable it for the current
 session. Setting `vim.g.invaders_music = false` also starts it muted.
 Pet preferences are stored outside the repository under Neovim's state directory.
 To retain preferences from the original custom configuration, set `pets.state_file`
@@ -147,15 +165,16 @@ Also set `PETSADHD_LAZY_PATH` to your lazy.nvim checkout to test the single-entr
 plugin installation through lazy.nvim itself.
 
 Modules live in `lua/petsadhd/`: `init.lua` exposes setup and the chooser,
-`pets.lua` renders the habitat, `tetris.lua` and `invaders.lua` own the games,
-and `audio.lua` owns soundtrack processes.
+`pets.lua` renders the habitat, `tetris.lua` and `invaders.lua` own the games, `duel.lua` adds competitive Tetris, `window.lua`
+handles minimize/resume, and `audio.lua` owns soundtrack processes. VS Code has
+a JavaScript port under `vscode/`, with its own tests and packaging script.
 
 ## Push your repository
 
 Create an empty repository named **PetsADHD** on your Git host, then run:
 
 ```sh
-git remote add origin git@github.com:YOUR_GITHUB_USERNAME/PetsADHD.git
+git remote add origin git@github.com:mruniverse8/PetsADHD.git
 git push -u origin main
 ```
 

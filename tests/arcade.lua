@@ -84,7 +84,7 @@ for _, span in ipairs(spans) do
   assert(span[2] + 2 <= #lines[span[1] + 1])
 end
 
-astra.setup()
+astra.setup({ music = false })
 local original = vim.api.nvim_get_current_buf()
 for _ = 1, 3 do
   vim.cmd("AstraGame")

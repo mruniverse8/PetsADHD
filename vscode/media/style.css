@@ -1,0 +1,105 @@
+:root {
+  color-scheme: dark;
+}
+body {
+  margin: 0 auto;
+  padding: 20px;
+  max-width: 1100px;
+  font-family: var(--vscode-font-family, system-ui);
+  color: var(--vscode-foreground, #dce5ed);
+  background: var(--vscode-editor-background, #101725);
+}
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+strong {
+  font-size: 24px;
+  letter-spacing: -1px;
+}
+strong span {
+  color: #8bd5ef;
+}
+small {
+  opacity: 0.65;
+}
+nav,
+section {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+button,
+select {
+  font: inherit;
+  color: var(--vscode-button-foreground, #fff);
+  background: var(--vscode-button-secondaryBackground, #26364c);
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+button:hover,
+button.active {
+  background: var(--vscode-button-background, #346f9d);
+}
+button:focus-visible,
+select:focus-visible,
+canvas:focus-visible {
+  outline: 2px solid #8bd5ef;
+  outline-offset: 2px;
+}
+label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 75vh;
+  object-fit: contain;
+  background: #101725;
+  border: 1px solid #304256;
+  border-radius: 8px;
+}
+#status {
+  min-height: 1.3em;
+  color: #8bd5ef;
+  font-variant-numeric: tabular-nums;
+}
+#help {
+  line-height: 1.7;
+  opacity: 0.8;
+  font-size: 12px;
+}
+body.sidebar {
+  padding: 8px;
+}
+body.sidebar header {
+  margin: 0;
+}
+body.sidebar strong {
+  font-size: 18px;
+}
+body.sidebar small {
+  display: none;
+}
+body.sidebar button,
+body.sidebar select {
+  padding: 4px 6px;
+  font-size: 11px;
+}
+body.sidebar #gameControls {
+  display: none;
+}
+body.sidebar #screen {
+  max-height: 260px;
+}
+.hidden {
+  display: none !important;
+}

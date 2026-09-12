@@ -49,13 +49,13 @@ function M.new(opts)
     end
     if vim.fn.executable(extractor) == 0 or vim.fn.executable(player) == 0 then
       self.status = "unavailable"
-      vim.notify("Invaders music needs yt-dlp and ffplay. Press m to retry after installing them.", vim.log.levels.WARN)
+      vim.notify("Game music needs yt-dlp and ffplay. Press M to retry after installing them.", vim.log.levels.WARN)
       return
     end
     local generation = self.generation
     local function failure(message)
       self.status = "unavailable"
-      vim.notify("Invaders soundtrack: " .. message, vim.log.levels.WARN)
+      vim.notify("Game soundtrack: " .. message, vim.log.levels.WARN)
     end
     local function launch(stream)
       local errors = {}
@@ -139,7 +139,7 @@ function M.new(opts)
     vim.defer_fn(function()
       if self.generation == generation and self.extractor == job then
         self:stop()
-        failure("YouTube did not respond in time. Press m twice to retry.")
+        failure("YouTube did not respond in time. Press M twice to retry.")
       end
     end, 30000)
   end
@@ -151,7 +151,7 @@ function M.new(opts)
     else
       self:stop()
     end
-    vim.notify("Invaders music " .. (self.enabled and "on" or "off"))
+    vim.notify("Game music " .. (self.enabled and "on" or "off"))
   end
 
   return self

@@ -22,17 +22,24 @@ COMMANDS                                                 *petsadhd-commands*
     :PetWeather     auto, sun, or rain.
     :Tetris         Astra Tetris (aliases :AstraGame, :PetGame).
     :SpaceInvaders  Resizable ASCII Space Invaders.
+    :TetrisDuel     Shared-keyboard competitive Tetris (alias :Tetris2P).
 
 CONTROLS                                                 *petsadhd-controls*
     Tetris: h/l or arrows move, j soft drops, k/x rotates, z rotates back,
-    Space hard drops. Invaders: h/l or arrows move, a fires, m toggles music.
-    Both: p pauses, r restarts, q/Escape closes. Leaving the game pauses it.
+    Space hard drops. Invaders: h/l or arrows move, a fires, M toggles music.
+    All games: m minimizes, M toggles music, p pauses, r restarts, q/Escape
+    quits. Run the same command after minimizing to resume the saved game.
+    Tetris: +/= speeds up, - slows down (1x-8x).
+    Two players: P1 a/d/s/w move/drop/rotate, g reverse rotate, f hard drop.
+    P2 arrows move/drop/rotate, / reverse rotate, Enter hard drop.
+    Clearing 2/3/4 lines sends 1/2/4 garbage rows. First top-out loses.
 
 OPTIONS                                                   *petsadhd-options*
     keymaps = false     Disable leader shortcuts uP, uA, uI.
     snacks = false      Disable automatic Snacks explorer integration.
     pets = {}           enabled, kind, size, weather, state_file.
-    music = false       Start muted (m can enable music).
+    music = false       Start muted (M can enable music).
+    tetris = {}         speed: initial speed multiplier, 1-8.
     music = {}          enabled, url, volume (0-100), extractor, player.
 
     Game-buffer controls always remain available. Pets use saved preferences

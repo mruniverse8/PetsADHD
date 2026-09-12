@@ -1,0 +1,111 @@
+{
+  "name": "petsadhd",
+  "displayName": "PetsADHD",
+  "description": "Pixel pets, Tetris, two-player Tetris and ASCII Space Invaders inside VS Code.",
+  "version": "0.2.0",
+  "publisher": "mruniverse8",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "pets",
+    "tetris",
+    "arcade",
+    "space-invaders"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onWebviewPanel:petsadhd.arcade"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mruniverse8/PetsADHD.git",
+    "directory": "vscode"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "petsadhd.open",
+        "title": "Open / Resume Arcade",
+        "category": "PetsADHD"
+      },
+      {
+        "command": "petsadhd.tetris",
+        "title": "Play Tetris",
+        "category": "PetsADHD"
+      },
+      {
+        "command": "petsadhd.duel",
+        "title": "Play Competitive Tetris (2 Players)",
+        "category": "PetsADHD"
+      },
+      {
+        "command": "petsadhd.invaders",
+        "title": "Play Space Invaders",
+        "category": "PetsADHD"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "petsadhd.habitat",
+          "name": "PetsADHD",
+          "type": "webview"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "PetsADHD",
+      "properties": {
+        "petsadhd.music.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the optional game soundtrack. Requires yt-dlp and ffplay."
+        },
+        "petsadhd.music.url": {
+          "type": "string",
+          "default": "https://www.youtube.com/watch?v=z0FRc-51_V4",
+          "description": "YouTube soundtrack URL."
+        },
+        "petsadhd.music.volume": {
+          "type": "number",
+          "default": 25,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Music volume."
+        },
+        "petsadhd.music.extractor": {
+          "type": "string",
+          "default": "",
+          "description": "Optional path to yt-dlp."
+        },
+        "petsadhd.tetris.speed": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Initial Tetris speed multiplier."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "package": "vsce package --no-dependencies --out ../dist/PetsADHD-0.2.0.vsix --baseContentUrl https://github.com/mruniverse8/PetsADHD/blob/main/vscode/ --baseImagesUrl https://raw.githubusercontent.com/mruniverse8/PetsADHD/main/vscode/"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.9.2",
+    "playwright-core": "^1.63.0",
+    "prettier": "^3.9.6"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Games and pets work in restricted mode; external audio processes require a trusted workspace."
+    }
+  }
+}

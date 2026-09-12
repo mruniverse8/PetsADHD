@@ -1,9 +1,6 @@
 -- Space Invaders with a live-resizing playfield and a separate simulation.
 local M = {}
-local active, ready
-local music_options = { enabled = true }
-local soundtrack = require("petsadhd.audio")
-local ns = vim.api.nvim_create_namespace("SpaceInvaders")
+local ready, view
 
 local function clamp(n, low, high)
   return math.max(low, math.min(high, n))
@@ -277,181 +274,57 @@ function M.render(s)
     lines[#lines + 1] = table.concat(row) .. "|"
   end
   lines[#lines + 1] = "+" .. string.rep("-", s.width) .. "+"
-  lines[#lines + 1] = s.width >= 58 and "h/l or arrows: move  a: fire  m: music  p/r/q"
-    or "h/l <>  a fire  m music  p/r/q"
+  lines[#lines + 1] = s.width >= 58 and "h/l or arrows: move  a: fire  m: hide  M: music  p/r/q"
+    or "h/l a:fire m:hide M:music p/r/q"
   return lines, spans
 end
 
-function M.close()
-  local session = active
-  active = nil
-  if not session then
-    return
-  end
-  session.music:stop()
-  session.timer:stop()
-  session.timer:close()
-  if vim.api.nvim_win_is_valid(session.win) then
-    vim.api.nvim_win_close(session.win, true)
-  end
-  if vim.api.nvim_buf_is_valid(session.buf) then
-    vim.api.nvim_buf_delete(session.buf, { force = true })
-  end
-end
-
-local function geometry()
-  local width = math.max(1, math.min(92, math.floor(vim.o.columns * 0.85), vim.o.columns - 4))
-  local height = math.max(1, math.min(32, vim.o.lines - vim.o.cmdheight - 4))
-  return {
-    relative = "editor",
-    width = width,
-    height = height,
-    row = math.max(0, math.floor((vim.o.lines - height - 2) / 2)),
-    col = math.max(0, math.floor((vim.o.columns - width - 2) / 2)),
-    style = "minimal",
-    border = "rounded",
-    title = " Space Invaders ",
-    title_pos = "center",
-  },
-    width < 34 or height < 14
-end
-
-local function draw(session)
-  if active ~= session or not vim.api.nvim_win_is_valid(session.win) then
-    return
-  end
-  session.music:pause(session.suspended or session.state.paused or session.state.over or false)
-  local lines, spans
-  if session.suspended then
-    lines, spans = { "Resize terminal to resume.", "Minimum: 40 columns, 19 rows." }, {}
-  else
-    lines, spans = M.render(session.state)
-  end
-  local width = vim.api.nvim_win_get_width(session.win)
-  for i, line in ipairs(lines) do
-    lines[i] = line:sub(1, width)
-  end
-  vim.bo[session.buf].modifiable = true
-  vim.api.nvim_buf_set_lines(session.buf, 0, -1, false, lines)
-  vim.bo[session.buf].modifiable = false
-  vim.api.nvim_buf_clear_namespace(session.buf, ns, 0, -1)
-  for _, span in ipairs(spans) do
-    vim.api.nvim_buf_set_extmark(session.buf, ns, span[1], span[2], { end_col = span[2] + 1, hl_group = span[3] })
-  end
-  vim.api.nvim_win_set_cursor(session.win, { 1, 0 })
-end
-
 function M.open()
-  if active and vim.api.nvim_win_is_valid(active.win) then
-    vim.api.nvim_set_current_win(active.win)
-    return
+  view.open()
+end
+function M.close()
+  if view then
+    view.close()
   end
-  local config, small = geometry()
-  if small then
-    vim.notify("Space Invaders needs at least 40 columns by 19 rows.", vim.log.levels.INFO)
-    return
+end
+function M.minimize()
+  if view then
+    view.minimize()
   end
-  M.close()
-  local b = vim.api.nvim_create_buf(false, true)
-  vim.bo[b].bufhidden, vim.bo[b].swapfile, vim.bo[b].undolevels = "wipe", false, -1
-  vim.bo[b].filetype = "spaceinvaders"
-  local session = {
-    buf = b,
-    win = vim.api.nvim_open_win(b, true, config),
-    timer = assert(vim.uv.new_timer()),
-    state = M.new(config.width - 2, config.height - 4),
-  }
-  session.music = soundtrack.new(
-    vim.tbl_extend("force", music_options, { enabled = music_options.enabled and vim.g.invaders_music ~= false })
-  )
-  active = session
-  session.music:start()
-  vim.wo[session.win].wrap = false
-  vim.wo[session.win].winhighlight = "Normal:InvadersBackground,NormalFloat:InvadersBackground"
-  local function bind(keys, callback)
-    for _, key in ipairs(keys) do
-      vim.keymap.set("n", key, function()
-        if active == session then
-          callback()
-        end
-      end, { buffer = b, nowait = true, silent = true })
-    end
-  end
-  for key, action in pairs({ h = "h", l = "l", ["<Left>"] = "h", ["<Right>"] = "l", a = "fire", p = "p" }) do
-    bind({ key }, function()
-      if not session.suspended then
-        M.input(session.state, action)
-        draw(session)
-      end
-    end)
-  end
-  bind({ "r" }, function()
-    if not session.suspended then
-      session.state = M.new(session.state.width, session.state.height)
-      draw(session)
-    end
-  end)
-  bind({ "m" }, function()
-    session.music:toggle()
-    draw(session)
-  end)
-  bind({ "q", "<Esc>" }, M.close)
-  bind({ "i", "I", "A", "o", "O", "R", "v", "V", "<C-v>", "s", "S", "c", "C", "d" }, function() end)
-  vim.api.nvim_create_autocmd("BufLeave", {
-    buffer = b,
-    callback = function()
-      if active == session then
-        session.state.paused = true
-        draw(session)
-      end
-    end,
-  })
-  vim.api.nvim_create_autocmd("BufWipeout", {
-    buffer = b,
-    once = true,
-    callback = function()
-      vim.schedule(function()
-        if active == session then
-          M.close()
-        end
-      end)
-    end,
-  })
-  session.timer:start(
-    80,
-    80,
-    vim.schedule_wrap(function()
-      if active ~= session then
-        return
-      end
-      if not vim.api.nvim_win_is_valid(session.win) then
-        M.close()
-        return
-      end
-      if
-        not session.suspended
-        and vim.api.nvim_get_current_win() == session.win
-        and vim.api.nvim_get_mode().mode == "n"
-      then
-        M.step(session.state)
-        draw(session)
-      end
-    end)
-  )
-  draw(session)
 end
 
 function M.setup(opts)
-  opts = opts or {}
-  music_options = vim.tbl_extend(
-    "force",
-    { enabled = true },
-    type(opts.music) == "table" and opts.music or { enabled = opts.music ~= false }
-  )
   if ready then
     return
   end
   ready = true
+  opts = opts or {}
+  view = require("petsadhd.window").new({
+    name = "SpaceInvaders",
+    title = "Space Invaders",
+    filetype = "spaceinvaders",
+    background = "InvadersBackground",
+    width = 92,
+    height = 32,
+    min_width = 34,
+    min_height = 14,
+    dynamic = true,
+    interval = 80,
+    music = opts.music,
+    render = M.render,
+    step = M.step,
+    input = M.input,
+    new = function(w, h)
+      return M.new(w - 2, h - 4)
+    end,
+    restart = function(s)
+      return M.new(s.width, s.height)
+    end,
+    resize = function(s, w, h)
+      M.resize(s, w - 2, h - 4)
+    end,
+    keys = { h = "h", l = "l", ["<Left>"] = "h", ["<Right>"] = "l", a = "fire", p = "p" },
+  })
   local group = vim.api.nvim_create_augroup("SpaceInvaders", { clear = true })
   local function colors()
     vim.api.nvim_set_hl(0, "InvadersBackground", { fg = "#c6d0f5", bg = "#111827" })
@@ -473,37 +346,9 @@ function M.setup(opts)
   end
   colors()
   vim.api.nvim_create_autocmd("ColorScheme", { group = group, callback = colors })
-  vim.api.nvim_create_autocmd("FocusLost", {
-    group = group,
-    callback = function()
-      if active then
-        active.state.paused = true
-        draw(active)
-      end
-    end,
-  })
-  vim.api.nvim_create_autocmd("VimResized", {
-    group = group,
-    callback = function()
-      if not active or not vim.api.nvim_win_is_valid(active.win) then
-        return
-      end
-      local config, small = geometry()
-      vim.api.nvim_win_set_config(active.win, config)
-      active.suspended = small
-      if small then
-        active.state.paused = true
-      else
-        M.resize(active.state, config.width - 2, config.height - 4)
-      end
-      draw(active)
-    end,
-  })
-  vim.api.nvim_create_autocmd("VimLeavePre", { group = group, callback = M.close })
-  vim.api.nvim_create_user_command("SpaceInvaders", M.open, { desc = "Play Space Invaders in a resizable window" })
+  vim.api.nvim_create_user_command("SpaceInvaders", M.open, { desc = "Play or resume Space Invaders" })
   if opts.keymaps ~= false then
     vim.keymap.set("n", "<leader>uI", M.open, { desc = "Play Space Invaders" })
   end
 end
-
 return M
