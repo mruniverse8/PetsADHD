@@ -1,0 +1,42 @@
+*petsadhd.txt*  Pixel companions and an arcade for Neovim
+
+PetsADHD                                                  *PetsADHD* *petsadhd*
+
+SETUP                                                       *petsadhd-setup*
+    require("petsadhd").setup({})
+
+    LazyVim: install with main = "petsadhd", lazy = false, and
+    dependencies = { "folke/snacks.nvim" }. See README.md for the full spec.
+
+COMMANDS                                                 *petsadhd-commands*
+    :PetsADHD       Game and pet chooser.
+    :Pet67          Enable readable pixel 67.
+    :PetTRex        Select the dinosaur.
+    :PetDog         Select the dog.
+    :PetDuck        Select the duck.
+    :PetOn          Enable the habitat.
+    :PetOff         Disable the habitat.
+    :PetToggle      Toggle the habitat.
+    :PetSmall       Small pet.
+    :PetBig         Large pet.
+    :PetWeather     auto, sun, or rain.
+    :Tetris         Astra Tetris (aliases :AstraGame, :PetGame).
+    :SpaceInvaders  Resizable ASCII Space Invaders.
+
+CONTROLS                                                 *petsadhd-controls*
+    Tetris: h/l or arrows move, j soft drops, k/x rotates, z rotates back,
+    Space hard drops. Invaders: h/l or arrows move, a fires, m toggles music.
+    Both: p pauses, r restarts, q/Escape closes. Leaving the game pauses it.
+
+OPTIONS                                                   *petsadhd-options*
+    keymaps = false     Disable leader shortcuts uP, uA, uI.
+    snacks = false      Disable automatic Snacks explorer integration.
+    pets = {}           enabled, kind, size, weather, state_file.
+    music = false       Start muted (m can enable music).
+    music = {}          enabled, url, volume (0-100), extractor, player.
+
+    Game-buffer controls always remain available. Pets use saved preferences
+    unless corresponding setup options are supplied. Music needs ffplay,
+    yt-dlp and a supported JS runtime; the code installs nothing automatically.
+
+vim:tw=78:ts=8:noet:ft=help:norl:

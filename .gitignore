@@ -1,0 +1,7 @@
+*.log
+*.swp
+*.swo
+.DS_Store
+doc/tags
+.venv/
+__pycache__/
