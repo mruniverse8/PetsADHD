@@ -4,6 +4,27 @@ const { test } = require("node:test"),
 const { Terminal } = require("@xterm/headless");
 const write = (terminal, value) =>
   new Promise((resolve) => terminal.write(value, resolve));
+test("pet music defaults, toggle, minimize/resume, custom track and workspace trust", async (t) => {
+  const h = host();
+  t.after(h.dispose);
+  h.config["panel.autoSize"] = false;
+  await h.commands["petsadhd.pets"]();
+  const p = h.terminals[0].options.pty;
+  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=oor2uIqys8M");
+  p.handleInput("m");
+  assert.equal(h.tracks.at(-1), "pause");
+  await h.commands["petsadhd.pets"]();
+  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=oor2uIqys8M");
+  p.handleInput("M");
+  assert.equal(p.state.musicOn, false);
+  assert.equal(h.tracks.at(-1), "stop");
+  h.config["pets.musicUrl"] = "https://example.com/custom-pet-track";
+  p.handleInput("M");
+  assert.equal(h.tracks.at(-1), "https://example.com/custom-pet-track");
+  h.api.workspace.isTrusted = false;
+  p.redraw();
+  assert.equal(h.tracks.at(-1), "stop");
+});
 test("native terminal panel: shared keys, speed, minimize/resume, saved reopening and docking", async (t) => {
   const h = host();
   t.after(h.dispose);

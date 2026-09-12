@@ -8,7 +8,7 @@ bottom with right alignment by default; side docking is also available.
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.8.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.9.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
 3. Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS). A terminal named **PetsADHD**
    opens at the **bottom with right alignment**, gains focus, expands for play, and starts Tetris.
@@ -164,10 +164,17 @@ does not report every panel-visibility or focus change.
 
 ## Optional music
 
-Tetris and competitive Tetris default to [Daft Punk — “Crescendolls”](https://www.youtube.com/watch?v=oor2uIqys8M).
-Use `petsadhd.tetris.musicUrl` to change it. Space Invaders keeps its
-[original soundtrack](https://www.youtube.com/watch?v=z0FRc-51_V4), configured with
-`petsadhd.music.url`. Audio requires `ffplay` (from FFmpeg), `yt-dlp[default]`, a
+Pets and games include default music. Press **M** to toggle it. You can change
+the pet music in VS Code's Settings JSON:
+
+```json
+{
+  "petsadhd.pets.musicUrl": "https://www.youtube.com/watch?v=YOUR_VIDEO_ID"
+}
+```
+
+Use `petsadhd.tetris.musicUrl` for Tetris and competitive Tetris, or
+`petsadhd.music.url` for Invaders. Audio requires `ffplay` (from FFmpeg), `yt-dlp[default]`, a
 supported JS runtime, network access, and a working audio device. Node.js is
 explicitly enabled; Deno is also supported by yt-dlp. No tools install
 automatically and no music files are bundled.

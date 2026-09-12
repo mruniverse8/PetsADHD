@@ -13,28 +13,36 @@ function activate(context) {
   const music = new Music(
     () => ({
       url:
-        musicMode === "tetris"
+        musicMode === "pets"
           ? setting().get(
-              "tetris.musicUrl",
+              "pets.musicUrl",
               "https://www.youtube.com/watch?v=oor2uIqys8M",
             )
-          : setting().get(
-              "music.url",
-              "https://www.youtube.com/watch?v=z0FRc-51_V4",
-            ),
+          : musicMode === "tetris"
+            ? setting().get(
+                "tetris.musicUrl",
+                "https://www.youtube.com/watch?v=oor2uIqys8M",
+              )
+            : setting().get(
+                "music.url",
+                "https://www.youtube.com/watch?v=z0FRc-51_V4",
+              ),
       volume: setting().get("music.volume", 25),
       extractor: setting().get("music.extractor", ""),
     }),
     (message) => vscode.window.showWarningMessage("PetsADHD: " + message),
   );
   function audio(state, paused) {
-    const mode = ["tetris", "duel"].includes(state.mode)
-      ? "tetris"
-      : "invaders";
+    const mode =
+      state.mode === "pets"
+        ? "pets"
+        : ["tetris", "duel"].includes(state.mode)
+          ? "tetris"
+          : "invaders";
     const enabled =
       vscode.workspace.isTrusted &&
       state.musicOn &&
-      ["tetris", "duel", "invaders"].includes(state.mode);
+      ["pets", "tetris", "duel", "invaders"].includes(state.mode);
     const signature = JSON.stringify([mode, enabled, paused]);
     if (signature === lastAudio) return;
     lastAudio = signature;

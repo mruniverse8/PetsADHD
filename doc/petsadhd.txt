@@ -10,6 +10,10 @@ SETUP                                                       *petsadhd-setup*
 
 COMMANDS                                                 *petsadhd-commands*
     :PetsADHD       Game and pet chooser.
+    :PetTerminal    Open/resume a small bottom terminal (Node.js 18+ needed).
+                    Alias: :PetsADHDTerminal. Optional mode argument:
+                    pets, tetris, duel, invaders, menu.
+    :PetTerminalClose  Save the terminal session and stop its process.
     :Pet67          Enable readable pixel 67.
     :PetTRex        Select the dinosaur.
     :PetDog         Select the dog.
@@ -25,6 +29,26 @@ COMMANDS                                                 *petsadhd-commands*
     :TetrisDuel     Shared-keyboard competitive Tetris (alias :Tetris2P).
 
 CONTROLS                                                 *petsadhd-controls*
+    <leader>uP opens/minimizes/resumes the bottom pixel terminal. The existing
+    sidebar remains available through :PetToggle.
+
+BOTTOM TERMINAL                                          *petsadhd-terminal*
+    Eight terminal rows, with five-line pets and a single menu line. Small
+    pixels, detailed sunset, clouds, mountains, water and occasional space
+    events. Pets keep animating while editing; games pause off-focus.
+    n: next pet (Rex, dog, cow, duck, 67). s: small/chunky pixels.
+    a: breathe fire. e: summon a black hole, supernova, comet, aurora or Saturn.
+    1-4: pets/Tetris/duel/Invaders. Games expand the pane; pets shrink it again.
+    m: hide and preserve. Tab: one-line menu. ?: help. M: toggle music.
+    q: discard the current game and return to the menu.
+    CTRL-\ CTRL-N: Neovim normal mode, then use normal window navigation.
+    Closing the split preserves the session. Reopen with :PetTerminal.
+    Sessions are saved per working directory in stdpath("state")/petsadhd,
+    including boards, pet selection, pixel size and animation position.
+    Requires Node.js 18+, Unicode block characters and truecolor; no npm
+    dependencies or browser. Existing Lua games work without Node.js.
+
+LUA FLOATING GAMES
     Tetris: h/l or arrows move, j soft drops, k/x rotates, z rotates back,
     Space hard drops. Invaders: h/l or arrows move, a fires, M toggles music.
     All games: m minimizes, M toggles music, p pauses, r restarts, q/Escape
@@ -40,6 +64,8 @@ OPTIONS                                                   *petsadhd-options*
     pets = {}           enabled, kind, size, weather, state_file.
     music = false       Start muted (M can enable music).
     tetris = {}         speed: initial speed multiplier, 1-8.
+    terminal = {}       height (8), game_height (18), pixel_size (1), pet,
+                        node (executable path), state_file (optional override).
     music = {}          enabled, url, volume (0-100), extractor, player.
 
     Game-buffer controls always remain available. Pets use saved preferences

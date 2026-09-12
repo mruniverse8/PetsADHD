@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.9
+
+- Add `:PetTerminal` / `:PetsADHDTerminal` and `<leader>uP` to open or resume an eight-row bottom terminal.
+- Share the latest five-line pixel pets, dog/cow, detailed sunset, fire and random space effects with VS Code; small pixels remain the default.
+- Expand for Tetris, shared-keyboard duels and Invaders; shrink when returning to pets.
+- Preserve games and animation on `m` or split close, restore sessions from disk, and pause games/music while editing.
+- Reuse Neovim's optional audio backend and the requested Tetris soundtrack. Node.js 18+ is required only for the new terminal.
+- Add default music to pets in both editors, `M` to toggle it and configurable pet music; document how to change the music.
+
 ## 0.3.8
 
 - Default to small 1× pet pixels and adopt the new default for older saved appearances.

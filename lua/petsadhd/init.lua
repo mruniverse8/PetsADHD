@@ -34,10 +34,12 @@ end
 
 function M.open()
   vim.ui.select(
-    { "Tetris", "Competitive Tetris (2 players)", "Space Invaders", "Choose pet", "Toggle pets" },
+    { "Terminal pets", "Tetris", "Competitive Tetris (2 players)", "Space Invaders", "Choose pet", "Toggle pets" },
     { prompt = "PetsADHD" },
     function(choice)
-      if choice == "Tetris" then
+      if choice == "Terminal pets" then
+        require("petsadhd.terminal").open("pets")
+      elseif choice == "Tetris" then
         require("petsadhd.tetris").open()
       elseif choice == "Competitive Tetris (2 players)" then
         require("petsadhd.duel").open()
@@ -73,6 +75,12 @@ function M.setup(opts)
   )
   require("petsadhd.duel").setup(vim.tbl_extend("force", { music = opts.music }, opts.tetris or {}))
   require("petsadhd.invaders").setup({ keymaps = opts.keymaps ~= false, music = opts.music })
+  require("petsadhd.terminal").setup(vim.tbl_extend("force", {
+    keymaps = opts.keymaps ~= false,
+    music = opts.music,
+    tetris_music = (opts.tetris or {}).music,
+    speed = (opts.tetris or {}).speed,
+  }, opts.terminal or {}))
   if opts.snacks ~= false then
     M.attach_snacks()
   end

@@ -4,7 +4,7 @@ const { render } = require("./terminal-renderer");
 const space = require("./space-events");
 const modes = ["menu", "pets", "tetris", "duel", "invaders"];
 const help = {
-  menu: "Choose 1 Pets, 2 Tetris, 3 Competitive Tetris, or 4 Invaders. Move the panel with PetsADHD: Move Game Panel.",
+  menu: "Choose 1 Pets, 2 Tetris, 3 Competitive Tetris, or 4 Invaders. m hides the terminal and preserves your session.",
   pets: "a: breathe fire. n: next pet (Rex, dog, cow, duck, 67). s: toggle fine/chunky pixels. e: summon a random space event. Sunset: clouds, mountains, reflections, occasional black holes, supernovas, comets, auroras and Saturn. Pets walk across the terminal at a fixed size. m: hide. Tab: menu.",
   tetris:
     "Arrows or h/j/k/l: move, soft drop, rotate. z: reverse rotate. Space: hard drop. + / -: speed 1–8.",

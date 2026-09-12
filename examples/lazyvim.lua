@@ -6,6 +6,8 @@ return {
     main = "petsadhd",
     lazy = false,
     dependencies = { "folke/snacks.nvim" },
-    opts = {},
+    opts = {
+      terminal = { height = 8, pixel_size = 1 },
+    },
   },
 }

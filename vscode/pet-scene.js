@@ -88,9 +88,9 @@ function menu(state, columns, frame = state.petFrame || 0) {
     : "SUNSET";
   const fire = state.petFire > 0 ? "FIRE!" : "a fire";
   const variants = [
-    `1 Pets 2 Tetris 3 Duel 4 Inv | ${fire} n pet s pixels e event m hide ? | ${state.pet} ${size}x | ${event ? `Sunset / ${label}` : "Sunset"}`,
-    `1234 | ${fire} n pet s pixels e event m hide ? | ${size}x ${label}`,
-    `1234 a n s${size} e m? ${short}`,
+    `1 Pets 2 Tetris 3 Duel 4 Inv | ${fire} n pet s pixels e event m hide M music ? | ${state.pet} ${size}x | ${event ? `Sunset / ${label}` : "Sunset"}`,
+    `1234 | ${fire} n pet s pixels e event m hide M music ? | ${size}x ${label}`,
+    `1234 a n s${size} e mM? ${short}`,
   ];
   return (
     variants.find((value) => value.length <= columns) ||

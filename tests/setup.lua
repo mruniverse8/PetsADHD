@@ -26,7 +26,17 @@ plugin.setup({
   pets = { enabled = false, kind = "sixseven", size = "small", weather = "rain", state_file = state_file },
 })
 plugin.setup({})
-for _, name in ipairs({ "PetsADHD", "Pet67", "PetToggle", "Tetris", "AstraGame", "SpaceInvaders" }) do
+for _, name in ipairs({
+  "PetsADHD",
+  "Pet67",
+  "PetToggle",
+  "Tetris",
+  "AstraGame",
+  "SpaceInvaders",
+  "PetTerminal",
+  "PetsADHDTerminal",
+  "PetTerminalClose",
+}) do
   assert(vim.fn.exists(":" .. name) == 2, "command registered: " .. name)
 end
 local pets = require("petsadhd.pets")
@@ -34,7 +44,10 @@ assert(pets.kind() == "sixseven" and pets.size() == "small" and pets.weather() =
 assert(not pets.is_enabled(), "disabled pet option respected")
 for _, map in ipairs(vim.api.nvim_get_keymap("n")) do
   assert(
-    not vim.tbl_contains({ "Toggle sidebar pets", "Play Astra Tetris", "Play Space Invaders" }, map.desc),
+    not vim.tbl_contains(
+      { "Toggle sidebar pets", "Play Astra Tetris", "Play Space Invaders", "Toggle PetsADHD terminal" },
+      map.desc
+    ),
     "leader mappings can be disabled"
   )
 end

@@ -4,7 +4,16 @@ Pixel pets and a tiny arcade for **Neovim / LazyVim and VS Code**. Includes anim
 sidebar companions, Astra Tetris, shared-keyboard competitive Tetris, and Space
 Invaders with optional music.
 
-**VS Code:** [download the VSIX](dist/PetsADHD-0.3.8.vsix), then run **Extensions:
+**LazyVim:** run **`:PetTerminal`** or press **Space → u → Shift+P** to open
+or resume a real terminal in a small **eight-row bottom split**. It includes the
+same five-line pixel pets, dog and cow, detailed sunset, fire and random space
+events as VS Code. Small pixels are the default. Press **m** to minimize without
+losing progress. Pets keep moving while you edit; games pause when you leave the
+pane. **1–4** selects pets, Tetris, two-player Tetris or Invaders. Games expand the
+pane, and returning to pets restores its small height. Requires **Node.js 18+**
+on PATH; no npm install is needed.
+
+**VS Code:** [download the VSIX](dist/PetsADHD-0.3.9.vsix), then run **Extensions:
 Install from VSIX**. Games run as pixel graphics in the integrated Terminal panel.
 Use **PetsADHD: Move Game Panel** to choose Bottom Right, Bottom, Left, or Right.
 Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS) to open or resume a game
@@ -32,6 +41,8 @@ See [VS Code instructions](vscode/README.md).
 - LazyVim with Snacks explorer, or Neo-tree for sidebar pets. The games also work
   without an explorer. No other Lua plugin is required for the games.
 - A terminal font with Unicode block characters for pets; Invaders uses ASCII.
+- The bottom pixel terminal additionally needs Node.js **18+** and a terminal
+  supporting truecolor. The existing Lua sidebar and floating games need no Node.js.
 - Optional music: `ffplay`, `yt-dlp[default]`, a supported JavaScript runtime
   such as Node.js or Deno, internet access, and working audio output.
   Audio pause/resume uses POSIX signals; Linux was tested.
@@ -72,6 +83,9 @@ commands and the layout integration. Restart Neovim after switching.
 
 | Command | Action |
 | --- | --- |
+| `:PetTerminal`, `:PetsADHDTerminal` | Open or resume the small bottom terminal |
+| `:PetTerminal pets` | Show the sunset pets; also accepts `tetris`, `duel`, `invaders`, `menu` |
+| `:PetTerminalClose` | Save the terminal session and stop its process |
 | `:Pet67` | Select and enable the pixel 67 companion |
 | `:PetTRex`, `:PetDog`, `:PetDuck` | Select a companion |
 | `:PetOn`, `:PetOff`, `:PetToggle` | Control the habitat |
@@ -81,8 +95,23 @@ commands and the layout integration. Restart Neovim after switching.
 | `:SpaceInvaders` | Open or resume Space Invaders |
 | `:TetrisDuel`, `:Tetris2P` | Open or resume shared-keyboard competitive Tetris |
 
-Default shortcuts: `<leader>uP` toggles pets, `<leader>uA` opens Tetris, and
+Default shortcuts: `<leader>uP` opens/minimizes the bottom terminal, `<leader>uA` opens Tetris, and
 `<leader>uI` opens Invaders. Game controls are local to their scratch buffers.
+The sidebar habitat remains available through `:PetToggle`.
+
+In the bottom terminal, **n** cycles Rex, dog, cow, duck and 67; **s** toggles
+small/chunky pixels; **a** breathes fire; **e** summons a black hole, supernova,
+comet, aurora or Saturn. **Tab** opens the one-line menu; **?** shows controls.
+Press **Ctrl+\\, Ctrl+N** to return to Neovim normal mode and move between splits.
+**m** hides the terminal; reopen it with its command or shortcut. Closing the
+split with `:close` also preserves it. Boards, pet preferences and animation
+positions are saved per working directory under Neovim's state directory, and
+restored after restarting Neovim. `q` returns to the menu and discards the current
+game; `:PetTerminalClose` saves and shuts down the terminal process.
+
+The following controls and size requirements describe the original Lua floating
+games. The bottom terminal uses the same game keys, with **1–4** for direct
+navigation and **q** to return to its menu.
 
 | Game | Controls |
 | --- | --- |
@@ -111,7 +140,7 @@ The first player to top out loses. `+` / `-` changes both players' speed equally
 
 ```lua
 opts = {
-  keymaps = true,  -- false disables the three leader shortcuts
+  keymaps = true,  -- false disables the leader shortcuts
   snacks = true,   -- false for a Neo-tree-only or games-only setup
   pets = {
     -- Omit these to restore saved preferences (defaults: on, trex, big, auto).
@@ -122,6 +151,14 @@ opts = {
     -- state_file = vim.fn.stdpath("state") .. "/petsadhd/pets-state",
   },
   tetris = { speed = 1 }, -- initial speed, 1–8
+  terminal = {
+    height = 8,       -- bottom pet pane, minimum 7 rows
+    game_height = 18, -- expand when selecting a game
+    pixel_size = 1,   -- small default; s changes the saved preference
+    -- node = "/path/to/node", -- if Node.js is not on PATH
+    -- pet = "dog",           -- first-run pet; also cow, trex, duck, sixseven
+    -- state_file = "/path/to/terminal-session.json",
+  },
   music = {
     enabled = true,
     -- url = "https://www.youtube.com/watch?v=...", -- optional override for all games
@@ -132,15 +169,24 @@ opts = {
 }
 ```
 
-Use `music = false` to start games muted. `M` can enable it for the current
+Use `music = false` to start pets and games muted. `M` can enable it for the current
 session. Setting `vim.g.invaders_music = false` also starts it muted.
 Pet preferences are stored outside the repository under Neovim's state directory.
 To retain preferences from the original custom configuration, set `pets.state_file`
 to `vim.fn.stdpath("state") .. "/quackers-state"`.
 
-Tetris and competitive Tetris use [Daft Punk — “Crescendolls”](https://www.youtube.com/watch?v=oor2uIqys8M) by default.
-Space Invaders uses [“06 - I Wanna Be The Guy OST - Tetris”](https://www.youtube.com/watch?v=z0FRc-51_V4).
-Set `tetris.music = { url = "..." }` to customize only the Tetris soundtrack.
+Pets and games include default music. Press **M** to toggle it and **m** to
+minimize and pause it. You can change the music in your LazyVim plugin options:
+
+```lua
+opts = {
+  music = { url = "https://www.youtube.com/watch?v=YOUR_VIDEO_ID" },
+}
+```
+
+Use `terminal.music = { url = "..." }` to customize just the bottom terminal,
+or `tetris.music = { url = "..." }` to customize Tetris. In VS Code settings,
+change `petsadhd.pets.musicUrl`, `petsadhd.tetris.musicUrl`, or `petsadhd.music.url`.
 Only the linked video streams, rather than its radio playlist. Audio is not bundled
 with this project. The MIT license covers the plugin code, not external music.
 Playback runs asynchronously; missing dependencies or network failures leave the
@@ -168,8 +214,10 @@ Neovim app names may have a different data directory; set `music.extractor` then
 ```
 
 Tests cover both game simulations, controls, resizing, pet rendering/persistence,
-plugin setup, and audio-process lifecycle. They need only Neovim and do not access
-the network or play audio. Optional real Snacks integration:
+plugin setup, audio-process lifecycle, and the real bottom terminal's render,
+resize, focus, hide/resume and disk persistence. The terminal integration test
+also needs Node.js; it is skipped if Node.js is absent. Tests do not access the
+network or play audio. Optional real Snacks integration:
 
 ```sh
 PETSADHD_SNACKS_PATH="$HOME/.local/share/nvim/lazy/snacks.nvim" ./scripts/test.sh
@@ -180,8 +228,10 @@ plugin installation through lazy.nvim itself.
 
 Modules live in `lua/petsadhd/`: `init.lua` exposes setup and the chooser,
 `pets.lua` renders the habitat, `tetris.lua` and `invaders.lua` own the games, `duel.lua` adds competitive Tetris, `window.lua`
-handles minimize/resume, and `audio.lua` owns soundtrack processes. VS Code has
-a JavaScript port under `vscode/`, with its own tests and packaging script.
+handles minimize/resume, and `audio.lua` owns soundtrack processes. `terminal.lua`
+hosts a native bottom PTY running `vscode/terminal-cli.js`. Both editor versions
+share the JavaScript terminal renderer, pixel artwork and game simulations under
+`vscode/`, with their own tests and a VS Code packaging script.
 
 ## Push your repository
 
