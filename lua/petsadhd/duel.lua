@@ -119,7 +119,7 @@ function M.setup(opts)
     width = 80,
     height = 26,
     cell_width = 2,
-    music = opts.music,
+    music = tetris.music_options(opts.music),
     new = function()
       return M.new({ speed = opts.speed })
     end,

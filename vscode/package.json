@@ -2,7 +2,7 @@
   "name": "petsadhd",
   "displayName": "PetsADHD",
   "description": "Pixel pets, Tetris, two-player Tetris and ASCII Space Invaders inside VS Code.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "mruniverse8",
   "license": "MIT",
   "engines": {
@@ -89,13 +89,18 @@
           "minimum": 1,
           "maximum": 8,
           "description": "Initial Tetris speed multiplier."
+        },
+        "petsadhd.tetris.musicUrl": {
+          "type": "string",
+          "default": "https://www.youtube.com/watch?v=oor2uIqys8M",
+          "description": "Default soundtrack for Tetris and competitive Tetris."
         }
       }
     }
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "package": "vsce package --no-dependencies --out ../dist/PetsADHD-0.2.0.vsix --baseContentUrl https://github.com/mruniverse8/PetsADHD/blob/main/vscode/ --baseImagesUrl https://raw.githubusercontent.com/mruniverse8/PetsADHD/main/vscode/"
+    "package": "vsce package --no-dependencies --out ../dist/PetsADHD-0.2.1.vsix --baseContentUrl https://github.com/mruniverse8/PetsADHD/blob/main/vscode/ --baseImagesUrl https://raw.githubusercontent.com/mruniverse8/PetsADHD/main/vscode/"
   },
   "devDependencies": {
     "@vscode/vsce": "^3.9.2",

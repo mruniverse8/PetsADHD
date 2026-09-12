@@ -23,3 +23,27 @@ test("extension registers games, sidebar, safe webview and saved-state reopening
   assert.match(h.panels[1].webview.html, /"hidden":true/);
   assert.deepEqual(h.storage.get("arcade"), state);
 });
+
+test("Tetris and duel select the new track, and Invaders selects its own track", async () => {
+  const h = host();
+  h.commands["petsadhd.open"]();
+  const p = h.panels[0];
+  for (const mode of ["tetris", "duel"]) {
+    await p.receive({ type: "music", mode, enabled: true, paused: false });
+    assert.equal(
+      h.tracks.at(-1),
+      "https://www.youtube.com/watch?v=oor2uIqys8M",
+    );
+  }
+  await p.receive({
+    type: "music",
+    mode: "invaders",
+    enabled: true,
+    paused: false,
+  });
+  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=z0FRc-51_V4");
+  assert.ok(
+    h.tracks.includes("stop"),
+    "old track stops before switching games",
+  );
+});

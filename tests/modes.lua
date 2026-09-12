@@ -58,10 +58,15 @@ end
 for _, span in ipairs(spans) do
   assert(span[2] + 2 <= #lines[span[1] + 1])
 end
+assert(tetris.music_options(false).enabled == false, "music can remain disabled")
+assert(
+  tetris.music_options({ url = "https://example.com/custom" }).url == "https://example.com/custom",
+  "explicit soundtrack overrides the default"
+)
 local audio = {}
 package.loaded["petsadhd.audio"] = {
-  new = function()
-    local a = {}
+  new = function(opts)
+    local a = { options = opts }
     function a:start()
       self.started = true
     end
@@ -88,6 +93,14 @@ local function maps(b)
 end
 for _, command in ipairs({ "Tetris", "TetrisDuel", "SpaceInvaders" }) do
   vim.cmd(command)
+  if command ~= "SpaceInvaders" then
+    assert(
+      audio[#audio].options.url == "https://www.youtube.com/watch?v=oor2uIqys8M",
+      "both Tetris modes use the requested default soundtrack"
+    )
+  else
+    assert(audio[#audio].options.url == nil, "Invaders keeps its own default soundtrack")
+  end
   local b, w = vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win()
   local key = maps(b)
   local before = vim.api.nvim_buf_get_lines(b, 1, -1, false)

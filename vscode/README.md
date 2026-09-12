@@ -7,7 +7,7 @@ Astra Tetris, local two-player competitive Tetris, and ASCII Space Invaders.
 
 ## Install
 
-1. Download **PetsADHD-0.2.0.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.2.1.vsix** from the repository's `dist` folder.
 2. In VS Code, run **Extensions: Install from VSIX** from the Command Palette.
 3. Select the file. Run **PetsADHD: Open / Resume Arcade**.
 
@@ -40,9 +40,9 @@ The canvas scales with the panel and leaves the board state intact.
 
 ## Optional music
 
-The default is the requested
-[“06 - I Wanna Be The Guy OST - Tetris” soundtrack](https://www.youtube.com/watch?v=z0FRc-51_V4).
-It works for Tetris, competitive Tetris, and Invaders. Audio requires `ffplay`
+Tetris and competitive Tetris default to [Daft Punk — “Crescendolls”](https://www.youtube.com/watch?v=oor2uIqys8M).
+Use `petsadhd.tetris.musicUrl` to change it. Space Invaders keeps its
+[original soundtrack](https://www.youtube.com/watch?v=z0FRc-51_V4), configured with `petsadhd.music.url`. Audio requires `ffplay`
 (from FFmpeg), `yt-dlp[default]`, a supported JS runtime, network access, and a
 working audio device. Node.js is explicitly enabled; Deno is also supported by
 yt-dlp. No tools install automatically and no music files are included.

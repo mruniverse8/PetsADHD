@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Set the requested oor2uIqys8M soundtrack as the Tetris and competitive Tetris default.
+- Add a separate VS Code Tetris soundtrack setting; switching games switches tracks.
+
 ## 0.2.0
 
 - Add a VS Code extension, Explorer pets view, saved arcade panel and installable VSIX.

@@ -5,11 +5,18 @@ const { Music } = require("./audio");
 function activate(context) {
   let panel,
     desiredPaused = true,
-    musicOn = false;
+    musicOn = false,
+    musicMode = "invaders";
   const setting = () => vscode.workspace.getConfiguration("petsadhd");
   const music = new Music(
     () => ({
-      url: setting().get("music.url"),
+      url:
+        musicMode === "tetris"
+          ? setting().get(
+              "tetris.musicUrl",
+              "https://www.youtube.com/watch?v=oor2uIqys8M",
+            )
+          : setting().get("music.url"),
       volume: setting().get("music.volume", 25),
       extractor: setting().get("music.extractor", ""),
     }),
@@ -80,6 +87,11 @@ function activate(context) {
           if (panel === target) target.dispose();
         }
         if (message.type === "music") {
+          const nextMode = ["tetris", "duel"].includes(message.mode)
+            ? "tetris"
+            : "invaders";
+          if (nextMode !== musicMode) music.stop();
+          musicMode = nextMode;
           musicOn = message.enabled === true;
           desiredPaused = message.paused === true;
           audio();

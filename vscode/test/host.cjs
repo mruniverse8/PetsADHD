@@ -80,8 +80,22 @@ module.exports = function host() {
     workspaceState: state(storage),
     globalState: state(global),
   };
+  const tracks = [];
+  class MockMusic {
+    constructor(config) {
+      this.config = config;
+    }
+    start() {
+      tracks.push(this.config().url);
+    }
+    stop() {
+      tracks.push("stop");
+    }
+    pause() {}
+  }
   const load = Module._load;
   Module._load = function (name, ...args) {
+    if (name === "./audio") return { Music: MockMusic };
     return name === "vscode" ? api : load.call(this, name, ...args);
   };
   delete require.cache[require.resolve("../extension")];
@@ -90,5 +104,13 @@ module.exports = function host() {
   } finally {
     Module._load = load;
   }
-  return { commands, panels, storage, providers, serializers, context: ctx };
+  return {
+    commands,
+    panels,
+    storage,
+    providers,
+    serializers,
+    tracks,
+    context: ctx,
+  };
 };

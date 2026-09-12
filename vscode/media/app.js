@@ -56,6 +56,7 @@
     const paused =
       !visible || mode === "pets" || !!current()?.paused || !!current()?.over;
     const value = JSON.stringify({
+      mode,
       enabled: !!musicOn && mode !== "pets",
       paused,
     });
@@ -63,6 +64,7 @@
       lastMusic = value;
       api.postMessage({
         type: "music",
+        mode,
         enabled: !!musicOn && mode !== "pets",
         paused,
       });

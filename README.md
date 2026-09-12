@@ -4,7 +4,7 @@ Pixel pets and a tiny arcade for **Neovim / LazyVim and VS Code**. Includes anim
 sidebar companions, Astra Tetris, shared-keyboard competitive Tetris, and Space
 Invaders with optional music.
 
-**VS Code:** [download the VSIX](dist/PetsADHD-0.2.0.vsix), then run **Extensions:
+**VS Code:** [download the VSIX](dist/PetsADHD-0.2.1.vsix), then run **Extensions:
 Install from VSIX**. See [VS Code instructions](vscode/README.md).
 
 - **Pets:** a T-rex, dog, duck, and readable pixel “67”, with two sizes and sun/rain.
@@ -112,7 +112,7 @@ opts = {
   tetris = { speed = 1 }, -- initial speed, 1–8
   music = {
     enabled = true,
-    url = "https://www.youtube.com/watch?v=z0FRc-51_V4",
+    -- url = "https://www.youtube.com/watch?v=...", -- optional override for all games
     volume = 25, -- 0–100
     -- extractor = "/path/to/yt-dlp",
     -- player = "/path/to/ffplay",
@@ -126,7 +126,9 @@ Pet preferences are stored outside the repository under Neovim's state directory
 To retain preferences from the original custom configuration, set `pets.state_file`
 to `vim.fn.stdpath("state") .. "/quackers-state"`.
 
-The default soundtrack is [“06 - I Wanna Be The Guy OST - Tetris”](https://www.youtube.com/watch?v=z0FRc-51_V4).
+Tetris and competitive Tetris use [Daft Punk — “Crescendolls”](https://www.youtube.com/watch?v=oor2uIqys8M) by default.
+Space Invaders uses [“06 - I Wanna Be The Guy OST - Tetris”](https://www.youtube.com/watch?v=z0FRc-51_V4).
+Set `tetris.music = { url = "..." }` to customize only the Tetris soundtrack.
 Only the linked video streams, rather than its radio playlist. Audio is not bundled
 with this project. The MIT license covers the plugin code, not external music.
 Playback runs asynchronously; missing dependencies or network failures leave the
