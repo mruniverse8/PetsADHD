@@ -49,7 +49,7 @@ function render(state, dimensions, frame = 0, suspended = false) {
     game = state.games[mode];
   const title = {
     menu: "ARCADE",
-    pets: "PIXEL PETS",
+    pets: "TINY PETS",
     tetris: "ASTRA TETRIS",
     duel: "TETRIS / 2 PLAYERS",
     invaders: "SPACE INVADERS",
@@ -164,47 +164,35 @@ function render(state, dimensions, frame = 0, suspended = false) {
       else pixels(grid, x + 1, 3);
     } else text(0, 3, "Resize: 68 columns x 18 rows minimum");
   } else if (mode === "pets") {
-    const small = state.petSize !== "large";
-    playable = cols >= 28 && rows >= 15;
+    const pixelStyle = state.petStyle === "pixels";
+    const minRows = pixelStyle ? 8 : 6;
+    playable = cols >= 24 && rows >= minRows;
     if (playable) {
-      const w = Math.min(cols - 2, small ? 40 : 64),
-        h = Math.min((rows - 5) * 2, small ? 20 : 38);
-      const grid = Array.from({ length: h }, (_, y) =>
-        Array(w).fill(y >= h - 2 ? "#263d39" : null),
-      );
+      const pet = sprites.art[state.pet] ? state.pet : "trex";
+      const art = sprites.art[pet];
+      const width = pixelStyle ? art[0].length : sprites.lines[pet].length;
+      const habitatWidth = 20,
+        origin = cols - habitatWidth - 1;
+      const span = habitatWidth - width;
+      const phase = Math.floor(frame / 4) % (span * 2);
+      const x = origin + Math.min(phase, span * 2 - phase);
+      const floor = rows - 3;
+      if (pixelStyle) {
+        pixels(
+          art.map((row) => [...row].map((c) => sprites.palette[c])),
+          x,
+          floor - 3,
+        );
+      } else text(x, floor - 1, sprites.lines[pet], sprites.colors[pet]);
       const rain =
         state.weather === "rain" ||
         (state.weather === "auto" && frame % 180 > 110);
-      if (rain)
-        for (let i = 0; i < w; i += 7)
-          grid[(i * 3 + frame) % (h - 2)][i] = "#58718c";
-      else
-        for (let y = 1; y < 5; y++)
-          for (let x = w - 7; x < w - 3; x++) grid[y][x] = "#eed49f";
-      const art = sprites.art[state.pet] || sprites.art.trex;
-      const size = Math.min(
-        small ? 1 : 2,
-        Math.max(1, Math.floor((h - 4) / art.length)),
-        Math.max(1, Math.floor((w - 2) / art[0].length)),
-      );
-      const span = Math.max(1, w - art[0].length * size),
-        phase = Math.floor(frame / 2) % (span * 2),
-        x = Math.min(phase, span * 2 - phase);
-      const y = h - 2 - art.length * size - (Math.floor(frame / 4) % 2);
-      art.forEach((row, r) =>
-        [...row].forEach((c, col) => {
-          if (!sprites.palette[c]) return;
-          for (let dy = 0; dy < size; dy++)
-            for (let dx = 0; dx < size; dx++)
-              if (grid[y + r * size + dy])
-                grid[y + r * size + dy][x + col * size + dx] =
-                  sprites.palette[c];
-        }),
-      );
-      pixels(grid, cols - w - 1, rows - 3 - h / 2);
+      // The narrow baseline carries the weather without a large sky or lawn.
+      text(origin, floor, "─".repeat(habitatWidth), BORDER);
+      put(cols - 2, floor, rain ? "/" : "*", rain ? BORDER : "#eed49f");
       text(0, rows - 2, " ".repeat(cols));
-      text(0, rows - 2, "n next pet  w weather  m hide", BORDER);
-    } else text(0, 3, "Resize: 28 columns x 15 rows minimum");
+      text(0, rows - 2, "n pet  w sky  m hide", BORDER);
+    } else text(0, 3, `Resize: 24 columns x ${minRows} rows`);
   }
   const status = !playable
     ? "PAUSED / enlarge the panel"

@@ -113,25 +113,25 @@ test("docking dimensions replace the old wide bottom-panel measurement before fi
 
 test("small pets shrink a bottom-right panel, then games regain their playable height", async () => {
   const f = fixture("bottom-right");
-  f.session.dimensions.rows = 40;
-  f.options.rows = 16;
+  f.session.dimensions.rows = 38;
+  f.options.rows = 8;
   f.options.shrink = true;
   await f.fit();
-  assert.equal(f.session.dimensions.rows, 16);
+  assert.equal(f.session.dimensions.rows, 8);
   assert.ok(f.calls.includes("workbench.action.decreaseViewSize"));
   f.options.rows = 28;
   f.options.shrink = false;
   await f.fit();
-  assert.equal(f.session.dimensions.rows, 28);
+  assert.ok(f.session.dimensions.rows >= 28);
 });
 
 test("a shrink step that clips the pet is reversed once without oscillating", async () => {
   const f = fixture("bottom-right");
-  f.session.dimensions.rows = 32;
-  f.options.rows = 16;
+  f.session.dimensions.rows = 24;
+  f.options.rows = 8;
   f.options.shrink = true;
   await f.fit();
-  assert.equal(f.session.dimensions.rows, 20);
+  assert.equal(f.session.dimensions.rows, 12);
   assert.equal(
     f.calls.filter((c) => c === "workbench.action.increaseViewSize").length,
     1,

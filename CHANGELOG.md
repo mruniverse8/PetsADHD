@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.4
+
+- Make VS Code pets permanently tiny: one-line ASCII companions by default, with optional three-line pixel sprites.
+- Replace the large sky/lawn with a thin baseline and target an eight-row pets panel.
+- Keep pets fixed in size after resizing; preserve bottom-right docking, shortcuts, and game resume.
+
 ## 0.3.3
 
 - Add small VS Code pets that stay at native pixel size in a compact bottom-right habitat.

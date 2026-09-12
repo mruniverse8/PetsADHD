@@ -69,7 +69,7 @@ function activate(context) {
         saved: context.workspaceState.get("arcade"),
         pet: context.globalState.get("pet", "trex"),
         speed: setting().get("tetris.speed", 1),
-        petSize: setting().get("pets.size", "small"),
+        petStyle: setting().get("pets.style", "line"),
         fit: () => {
           void resize().catch((error) =>
             vscode.window.showWarningMessage("PetsADHD: " + error.message),
@@ -107,12 +107,12 @@ function activate(context) {
   }
   async function resize() {
     if (!pty || !terminal) return;
-    const compact = pty.state.mode === "pets" && pty.state.petSize !== "large";
+    const compact = pty.state.mode === "pets";
     await fitPanel(vscode, terminal, pty, {
       autoSize: setting().get("panel.autoSize", true),
       position: setting().get("panel.position", "bottom-right"),
-      columns: compact ? 40 : setting().get("panel.columns", 72),
-      rows: compact ? 16 : setting().get("panel.rows", 28),
+      columns: compact ? 28 : setting().get("panel.columns", 72),
+      rows: compact ? 8 : setting().get("panel.rows", 28),
       shrink: compact,
     });
   }
@@ -163,7 +163,7 @@ function activate(context) {
         music.stop();
         lastAudio = "";
         if (pty) {
-          pty.state.petSize = setting().get("pets.size", "small");
+          pty.state.petStyle = setting().get("pets.style", "line");
           if (event.affectsConfiguration("petsadhd.music.enabled"))
             pty.state.musicOn = setting().get("music.enabled", true);
           pty.redraw();

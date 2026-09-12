@@ -8,7 +8,7 @@ bottom with right alignment by default; side docking is also available.
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.3.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.4.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
 3. Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS). A terminal named **PetsADHD**
    opens at the **bottom with right alignment**, gains focus, expands for play, and starts Tetris.
@@ -16,7 +16,7 @@ bottom with right alignment by default; side docking is also available.
 4. Press **Tab** for the arcade menu: **1** pets, **2** Tetris, **3** two-player Tetris, **4** Invaders.
 
 You can also run **PetsADHD: Play Tetris**, **Play Competitive Tetris (2 Players)**,
-**Play Space Invaders**, or **Show Pixel Pets** directly from the Command Palette.
+**Play Space Invaders**, or **Show Tiny Pets** directly from the Command Palette.
 VS Code 1.85 or newer is required. The extension is distributed as a VSIX and is
 not published to the Marketplace.
 
@@ -25,7 +25,7 @@ not published to the Marketplace.
 | Action | Windows / Linux | macOS |
 | --- | --- | --- |
 | Open / resume the last game (Tetris on first use) | **Ctrl+Alt+G** | **Cmd+Option+G** |
-| Open pixel pets | **Ctrl+Alt+P** | **Cmd+Option+P** |
+| Open tiny pets | **Ctrl+Alt+P** | **Cmd+Option+P** |
 | Hide and preserve the current game or pets | **m** inside the terminal | **m** inside the terminal |
 
 Both opening shortcuts automatically create or reveal the game terminal, dock it
@@ -34,7 +34,7 @@ terminal creation is needed. The game shortcut remembers your last game even if
 you switched to pets. A manually paused game stays paused; press **p** to resume.
 
 Customize these shortcuts in **Keyboard Shortcuts** by searching for
-**PetsADHD: Open / Resume Game** or **PetsADHD: Show Pixel Pets**.
+**PetsADHD: Open / Resume Game** or **PetsADHD: Show Tiny Pets**.
 
 ## Panel position and size
 
@@ -47,29 +47,32 @@ editor area and extends toward the right edge; it is not a separate floating
 corner terminal. Docking affects the entire panel, including other terminals.
 See VS Code's [panel layout controls](https://code.visualstudio.com/docs/configure/custom-layout#_panel).
 
-**Pets are small by default.** They keep their native pixel size and stay in a
-compact habitat at the bottom right inside the terminal. They no longer grow with
-the window. Select `petsadhd.pets.size: "large"` to restore larger sprites.
+**Pets always stay tiny.** The default is a **one-line ASCII companion** on a thin
+baseline. For example, the duck is `__(o)>` and the number pet is `6 7`.
+Set `petsadhd.pets.style` to `"pixels"` for hand-drawn miniature sprites only
+**three terminal lines tall**. Both styles stay at the bottom right and never
+scale up, even in a large window. The previous `petsadhd.pets.size` setting no
+longer enlarges pets.
 
-Opening small pets adjusts the bottom panel toward **16 rows**, allowing a few
-extra rows for VS Code's resize increments. Opening a game expands it toward
-**28 rows**. Left/right panels use a width target of **40 columns** for small pets
-and **72 columns** for games. Switching modes through the menu also adjusts the
-size while preserving games. Expansion stops at the available window space.
+Opening pets adjusts the bottom panel toward **8 rows**, subject to VS Code's
+minimum size and resize increments. Opening a game expands it toward **28 rows**.
+Left/right panels use a width target of **28 columns** for pets and **72 columns**
+for games. Switching modes through the menu also adjusts the size while preserving
+games. Expansion stops at the available window space.
 
 Optional VS Code settings:
 
 ```json
 {
   "petsadhd.panel.position": "bottom-right",
-  "petsadhd.pets.size": "small",
+  "petsadhd.pets.style": "line",
   "petsadhd.panel.autoSize": true,
   "petsadhd.panel.columns": 72,
   "petsadhd.panel.rows": 28
 }
 ```
 
-The columns/rows settings control the game size; small pets use the compact targets
+The columns/rows settings control the game size; pets use the compact targets
 above. Set `petsadhd.panel.autoSize` to `false` to keep your manually chosen size.
 You can also drag the panel edge during play; automatic fitting only runs when
 opening or switching modes.
@@ -85,7 +88,8 @@ the game and audio suspend until the panel is enlarged.
 
 | Mode | Minimum terminal size (columns × rows) |
 | --- | --- |
-| Pets | 28 × 15 |
+| One-line pets | 24 × 6 |
+| Tiny pixel pets | 24 × 8 |
 | Solo Tetris | 28 × 16 |
 | Competitive Tetris, side by side | 56 × 16 |
 | Competitive Tetris, stacked | 28 × 28 |

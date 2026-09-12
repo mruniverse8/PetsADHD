@@ -26,7 +26,7 @@ class ArcadeTerminal {
         ? saved.pet
         : options.pet || "trex",
       weather: saved.weather || "auto",
-      petSize: options.petSize || "small",
+      petStyle: options.petStyle || "line",
       musicOn: saved.musicOn ?? options.music,
     };
     // Import minimized games from the old extension without resetting a board.
