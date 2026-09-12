@@ -163,16 +163,7 @@ function render(state, dimensions, frame = 0, suspended = false) {
       const scene = pets.scene(state, cols, state.petFrame ?? frame);
       const floor = rows - 2;
       pixels(scene.grid, 1, floor - 5);
-      text(
-        1,
-        floor,
-        "─".repeat(cols - 2),
-        scene.weather === "rain"
-          ? "#7ba7d5"
-          : scene.weather === "sunset"
-            ? "#ffac70"
-            : BORDER,
-      );
+      text(1, floor, "─".repeat(cols - 2), "#53557c");
     } else text(0, 0, "Resize: 24 cols x 7 rows");
   }
   const status = !playable
@@ -194,19 +185,14 @@ function render(state, dimensions, frame = 0, suspended = false) {
               : "";
   if (!compactUI) text(0, 1, status, "#eed49f");
   else {
-    let choices =
-      cols >= 64
-        ? "1 Pets  2 Tetris  3 Duel  4 Invaders | n pet w sky m hide ? help"
-        : cols >= 40
-          ? "1 Pets 2 Tetris 3 Duel 4 Inv | n w m ?"
-          : "1Pet 2Tet 3D 4Inv n/w m?";
-    if (mode === "menu")
-      choices = choices
-        .replace("n pet w sky ", "")
-        .replace("n w ", "")
-        .replace("n/w ", "");
-    if (mode === "pets")
-      choices = pets.menu(state, cols, state.petFrame ?? frame);
+    const choices =
+      mode === "pets"
+        ? pets.menu(state, cols, state.petFrame ?? frame)
+        : cols >= 64
+          ? "1 Pets 2 Tetris 3 Duel 4 Invaders | m hide ? help"
+          : cols >= 40
+            ? "1 Pets 2 Tetris 3 Duel 4 Inv | m hide ?"
+            : "1Pet 2Tet 3D 4Inv m?";
     text(0, rows - 1, choices, "#8bd5ef");
   }
   const lines = screen.map((row) => {

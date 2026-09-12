@@ -4,7 +4,7 @@ const { render } = require("./terminal-renderer");
 const modes = ["menu", "pets", "tetris", "duel", "invaders"];
 const help = {
   menu: "Choose 1 Pets, 2 Tetris, 3 Competitive Tetris, or 4 Invaders. Move the panel with PetsADHD: Move Game Panel.",
-  pets: "a: breathe fire. n: next pet (Rex, dog, duck, 67). w: auto/sun/rain/sunset. Pets walk across the terminal at a fixed size. m: hide. Tab: menu.",
+  pets: "a: breathe fire. n: next pet (Rex, dog, cow, duck, 67). s: toggle fine/chunky pixels. Night sky: stars, Saturn, galaxies. Pets walk across the terminal at a fixed size. m: hide. Tab: menu.",
   tetris:
     "Arrows or h/j/k/l: move, soft drop, rotate. z: reverse rotate. Space: hard drop. + / -: speed 1–8.",
   duel: "Shared keyboard. P1: a/d move, s down, w/g rotate, f hard drop. P2: arrows, / reverse rotate, Enter hard drop. + / - changes both speeds.",
@@ -22,10 +22,16 @@ class ArcadeTerminal {
       lastGame: saved.lastGame,
       mode: modes.includes(saved.mode) ? saved.mode : "menu",
       games: saved.games || {},
-      pet: ["trex", "dog", "duck", "sixseven"].includes(saved.pet)
+      pet: ["trex", "dog", "cow", "duck", "sixseven"].includes(saved.pet)
         ? saved.pet
         : options.pet || "trex",
-      weather: saved.weather || "auto",
+      weather: "night",
+      pixelSize:
+        saved.pixelSize === 1 || saved.pixelSize === 2
+          ? saved.pixelSize
+          : options.pixelSize === 1
+            ? 1
+            : 2,
       petFrame: Math.max(0, Math.floor(Number(saved.petFrame) || 0)),
       petFire: Math.max(0, Math.min(10, Number(saved.petFire) || 0)),
       musicOn: saved.musicOn ?? options.music,
@@ -209,15 +215,12 @@ class ArcadeTerminal {
     else if (this.state.mode === "pets") {
       if (key === "a" && this.playable) this.state.petFire = 10;
       if (key === "n") {
-        const pets = ["trex", "dog", "duck", "sixseven"];
+        const pets = ["trex", "dog", "cow", "duck", "sixseven"];
         this.state.pet = pets[(pets.indexOf(this.state.pet) + 1) % pets.length];
         this.state.petFire = 0;
       }
-      if (key === "w") {
-        const weather = ["auto", "sun", "rain", "sunset"];
-        this.state.weather =
-          weather[(weather.indexOf(this.state.weather) + 1) % weather.length];
-      }
+      if (key === "s")
+        this.state.pixelSize = this.state.pixelSize === 1 ? 2 : 1;
     } else if (key === "r") {
       const speed =
         this.state.mode === "duel"

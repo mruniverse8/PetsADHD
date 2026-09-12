@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.7
+
+- Add blocky dog and cow sprites with original collar, coat and muzzle details.
+- Add `s` to toggle chunky 2× and finer 1× pet pixels while keeping five-line height.
+- Replace weather cycling with permanent night: twinkling stars, Saturn, a spiral galaxy and shooting stars.
+- Update the one-line menu, previews, help and saved-state migration for the new pets and sky.
+
 ## 0.3.6
 
 - Add animated pet fire on `a`, visible rain with drops and splashes, and sunset scenery.

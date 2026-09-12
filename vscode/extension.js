@@ -69,6 +69,7 @@ function activate(context) {
         saved: context.workspaceState.get("arcade"),
         pet: context.globalState.get("pet", "trex"),
         speed: setting().get("tetris.speed", 1),
+        pixelSize: setting().get("pets.pixelSize", 2),
         fit: () => {
           void resize().catch((error) =>
             vscode.window.showWarningMessage("PetsADHD: " + error.message),
@@ -162,6 +163,8 @@ function activate(context) {
         music.stop();
         lastAudio = "";
         if (pty) {
+          if (event.affectsConfiguration("petsadhd.pets.pixelSize"))
+            pty.state.pixelSize = setting().get("pets.pixelSize", 2);
           if (event.affectsConfiguration("petsadhd.music.enabled"))
             pty.state.musicOn = setting().get("music.enabled", true);
           pty.redraw();

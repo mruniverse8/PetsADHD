@@ -61,10 +61,10 @@ test("the arcade chooser fits on exactly one line at narrow and wide sizes", () 
   }
 });
 
-const { scene, pose, weatherAt, menu } = require("../pet-scene");
+const { scene, pose, pixelSize, menu } = require("../pet-scene");
 test("pets traverse the available width, face travel direction and retain their original dimensions", () => {
   for (const pet of Object.keys(sprites.art)) {
-    const width = Math.max(...sprites.art[pet].map((row) => row.length));
+    const width = Math.max(...sprites.chunky[pet].map((row) => row.length)) * 2;
     const positions = Array.from({ length: 450 }, (_, frame) =>
       pose(pet, 120, frame),
     );
@@ -81,29 +81,49 @@ test("pets traverse the available width, face travel direction and retain their 
     }
   }
 });
-test("rain has moving drops; sunset has a warm sky; fire is visibly different and all fit five lines", () => {
-  const base = { pet: "trex", weather: "rain" };
-  const rain = scene(base, 80, 0),
-    later = scene(base, 80, 1);
-  assert.notDeepEqual(rain.grid, later.grid);
-  assert.ok(rain.grid.flat().includes("#aacbeb"));
-  const sunset = scene({ ...base, weather: "sunset" }, 80, 0);
-  assert.ok(sunset.grid.flat().includes("#cb785e"));
-  const fire = scene({ ...base, petFire: 10 }, 80, 0);
+test("night sky always has stars, Saturn rings and a galaxy, even with legacy weather settings", () => {
+  for (const weather of ["auto", "sun", "sunset", "rain", "night"]) {
+    const sky = scene({ pet: "dog", weather }, 120, 0);
+    assert.equal(sky.weather, "night");
+    assert.equal(sky.grid.length, 10);
+    assert.ok(sky.grid.flat().includes("#ecf2ff"));
+    assert.ok(sky.grid.flat().includes("#bfa485"));
+    assert.ok(sky.grid.flat().includes("#eee1ff"));
+    assert.deepEqual(
+      sky.grid,
+      scene({ pet: "dog", weather: "night" }, 120, 0).grid,
+    );
+  }
+  assert.notDeepEqual(
+    scene({ pet: "dog" }, 120, 0).grid,
+    scene({ pet: "dog" }, 120, 8).grid,
+  );
+  const fire = scene({ pet: "cow", petFire: 10 }, 120, 0);
   assert.ok(fire.grid.flat().includes("#ed643d"));
-  assert.ok(!rain.grid.flat().includes("#ed643d"));
-  for (const s of [rain, later, sunset, fire]) assert.equal(s.grid.length, 10);
-  assert.equal(weatherAt("auto", 0), "sun");
-  assert.equal(weatherAt("auto", 120), "sunset");
-  assert.equal(weatherAt("auto", 240), "rain");
 });
-test("the single-line pet menu shows fire and current weather even at minimum width", () => {
-  for (const columns of [24, 40, 60, 100])
-    for (const weather of ["sun", "rain", "sunset"]) {
-      const line = menu({ pet: "trex", weather }, columns, 0);
-      assert.ok(line.length <= columns);
-      assert.match(line, /fire/i);
-      assert.ok(line.toLowerCase().includes(weather));
-      assert.ok(line.includes("?") && line.includes("m"));
+test("dog and cow have distinct original sprites in two pixel sizes, each at most five lines high", () => {
+  for (const pet of ["dog", "cow"])
+    for (const size of [1, 2]) {
+      const source = size === 2 ? sprites.chunky[pet] : sprites.art[pet];
+      assert.equal(source.length * size, 10);
+      assert.ok(Math.max(...source.map((row) => row.length)) * size <= 22);
+      const s = scene({ pet, pixelSize: size }, 24, 0);
+      assert.equal(s.actor.scale, size);
+      assert.ok(s.actor.x >= 0 && s.actor.x + s.actor.width <= 22);
+      assert.equal(s.height, 10);
     }
+  assert.notDeepEqual(sprites.art.dog, sprites.art.cow);
+  assert.ok(sprites.chunky.dog.join("").includes("T"), "teal collar");
+  assert.ok(sprites.chunky.cow.join("").includes("P"), "pink muzzle");
+  assert.equal(pixelSize(undefined), 2);
+});
+test("single-line menu includes fire, pixel-size controls and night at every supported width", () => {
+  for (const columns of [24, 40, 60, 120]) {
+    const line = menu({ pet: "cow", pixelSize: 2 }, columns, 0);
+    assert.ok(line.length <= columns);
+    assert.match(line, /fire/i);
+    assert.match(line, /night/i);
+    assert.ok(line.includes("s") && line.includes("?") && line.includes("m"));
+    assert.doesNotMatch(line, /w sky|sunset|rain/);
+  }
 });
