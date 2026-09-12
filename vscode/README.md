@@ -8,7 +8,7 @@ bottom with right alignment by default; side docking is also available.
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.7.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.8.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
 3. Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS). A terminal named **PetsADHD**
    opens at the **bottom with right alignment**, gains focus, expands for play, and starts Tetris.
@@ -52,34 +52,45 @@ See VS Code's [panel layout controls](https://code.visualstudio.com/docs/configu
 Minecraft-inspired look with original details: a teal dog collar and a distinct
 cow coat pattern with a pink muzzle. Their menu names are simply **dog** and **cow**.
 
-**s** changes the pixel size: **2× chunky blocks** by default, or **1× finer pixels**.
+**s** changes the pixel size: **1× small/fine pixels** by default, or **2× chunky blocks**.
 Each size uses a matching sprite design so the pets still fit within five lines.
 The choice is remembered in this workspace. Set `petsadhd.pets.pixelSize` in VS Code
 settings to change the preferred size. Pets never enlarge automatically when the
-terminal is resized.
+terminal is resized. This update adopts the small default for older saved
+appearances; an explicit pixel-size setting still takes priority. Subsequent
+changes with **s** are remembered.
 
 Pets have a thin baseline and **one menu line**, with no separate title, status,
 or extra control rows. The arcade chooser also uses a single line:
 
 ```text
-1234 games | a fire n pet s pixels m hide ? | cow 2x NIGHT
+1234 | a fire n pet s pixels e event m hide ? | 1x Sunset
 ```
 
 Press **1–4** to switch directly between modes without losing game progress.
-**a** makes the pet breathe animated fire. **n** changes the pet, and **s** changes
-pixel size. Labels shorten in narrow panels; **?** shows the full controls.
+**a** breathes fire, **n** changes the pet, **s** changes pixel size, and **e**
+summons a random space event. Labels shorten in narrow panels; **?** shows full
+controls. The menu names the active event.
 
-The sky is **always night**, with twinkling stars, a shaded Saturn with tilted rings,
-a spiral galaxy and occasional shooting stars. Sun, rain and sunset cycling have
-been removed; saved weather preferences cannot switch the scene away from night.
+The sky is a **detailed sunset** with a violet-to-rose gradient, peach-lit cloud
+ribbons, a glowing low sun, layered mountain silhouettes, and rippling water
+reflections. Old night settings automatically adopt this scene.
+
+Space events appear occasionally over the sunset: **black holes** with bright
+accretion disks, expanding **supernova explosions**, **comets**, flowing **auroras**,
+and ringed **Saturn**. Each lasts about seven seconds of active animation, with
+quiet intervals between automatic events. Press **e** to summon one immediately.
+The event sequence is randomized per workspace and preserved on reopening.
 
 Pets walk across the available terminal width, turn to face their direction,
 and animate their feet. The readable 67 keeps its numbers upright. **m** freezes
-movement and fire while hidden; reopening resumes them.
+movement, fire and space events while hidden; reopening resumes them.
 
-![Dog under stars, Saturn and a galaxy](media/pets-preview.png)
+![Small dog with a detailed sunset](media/pets-preview.png)
 
-![Cow with a distinct coat and pink muzzle](media/cow-preview.png)
+![Black hole above the sunset](media/blackhole-preview.png)
+
+![Supernova expanding over the mountains](media/supernova-preview.png)
 
 Opening pets adjusts the bottom panel toward **8 rows**, subject to VS Code's
 minimum size and resize increments. Opening a game expands it toward **28 rows**.
@@ -92,7 +103,7 @@ Optional VS Code settings:
 ```json
 {
   "petsadhd.panel.position": "bottom-right",
-  "petsadhd.pets.pixelSize": 2,
+  "petsadhd.pets.pixelSize": 1,
   "petsadhd.panel.autoSize": true,
   "petsadhd.panel.columns": 72,
   "petsadhd.panel.rows": 28
@@ -132,7 +143,7 @@ Click inside the PetsADHD terminal before playing. Press **?** for control help.
 | Competitive P1 | **a/d** move, **s** soft drop, **w/g** rotate, **f** hard drop |
 | Competitive P2 | **arrows** move/rotate/soft drop, **/** reverse rotate, **Enter** hard drop |
 | Invaders | **Left/Right** or **h/l** move; **a** fires |
-| Pets | **a** breathes fire; **n** cycles Rex, dog, cow, duck, 67; **s** changes pixel size |
+| Pets | **a** breathes fire; **n** cycles Rex, dog, cow, duck, 67; **s** changes pixel size; **e** summons a space event |
 
 Two players share one keyboard, using lowercase letters for Player 1. Both get
 identical pieces and speed. Clearing 2 / 3 / 4 rows sends 1 / 2 / 4 garbage rows

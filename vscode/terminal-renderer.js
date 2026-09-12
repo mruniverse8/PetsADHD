@@ -163,7 +163,7 @@ function render(state, dimensions, frame = 0, suspended = false) {
       const scene = pets.scene(state, cols, state.petFrame ?? frame);
       const floor = rows - 2;
       pixels(scene.grid, 1, floor - 5);
-      text(1, floor, "─".repeat(cols - 2), "#53557c");
+      text(1, floor, "─".repeat(cols - 2), "#b58a89");
     } else text(0, 0, "Resize: 24 cols x 7 rows");
   }
   const status = !playable

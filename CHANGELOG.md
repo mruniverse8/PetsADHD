@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.8
+
+- Default to small 1× pet pixels and adopt the new default for older saved appearances.
+- Replace the night sky with a detailed sunset: drifting clouds, sun glow, mountains and animated reflections.
+- Add occasional black holes, supernova explosions, comets, auroras and Saturn; `e` summons an event immediately.
+- Preserve event timing while minimized and show active event details in the one-line menu.
+
 ## 0.3.7
 
 - Add blocky dog and cow sprites with original collar, coat and muzzle details.

@@ -177,14 +177,14 @@ test("inline navigation selects games from pets and preserves a board through th
   assert.equal(p.state.mode, "invaders");
 });
 
-test("pet fire and walking freeze on hide; the sky stays night and pixel size resumes", async (t) => {
+test("pet fire and walking freeze on hide; the sky stays sunset and pixel size resumes", async (t) => {
   const h = host();
   t.after(h.dispose);
   h.config["panel.autoSize"] = false;
   await h.commands["petsadhd.pets"]();
   const p = h.terminals[0].options.pty;
   p.handleInput("wwwa");
-  assert.equal(p.state.weather, "night");
+  assert.equal(p.state.weather, "sunset");
   assert.equal(p.state.petFire, 10);
   p.tick();
   assert.equal(p.state.petFire, 9);
@@ -198,11 +198,11 @@ test("pet fire and walking freeze on hide; the sky stays night and pixel size re
   assert.equal(p.state.petFire, 8);
   assert.equal(p.state.petFrame, frame + 1);
   p.handleInput("ws");
-  assert.equal(p.state.weather, "night");
-  assert.equal(p.state.pixelSize, 1);
+  assert.equal(p.state.weather, "sunset");
+  assert.equal(p.state.pixelSize, 2);
 });
 
-test("n selects dog and cow by name and persists cow plus finer pixels", async (t) => {
+test("n selects dog and cow by name and persists cow plus a chosen chunky pixel size", async (t) => {
   const h = host();
   t.after(h.dispose);
   h.config["panel.autoSize"] = false;
@@ -212,11 +212,37 @@ test("n selects dog and cow by name and persists cow plus finer pixels", async (
   assert.equal(p.state.pet, "dog");
   p.handleInput("ns");
   assert.equal(p.state.pet, "cow");
-  assert.equal(p.state.pixelSize, 1);
+  assert.equal(p.state.pixelSize, 2);
   h.terminals[0].dispose();
   await h.commands["petsadhd.pets"]();
   const restored = h.terminals[1].options.pty;
   assert.equal(restored.state.pet, "cow");
-  assert.equal(restored.state.pixelSize, 1);
-  assert.equal(restored.state.weather, "night");
+  assert.equal(restored.state.pixelSize, 2);
+  assert.equal(restored.state.weather, "sunset");
+});
+
+test("upgrade adopts small pixels and e starts an event that pauses and restores", async (t) => {
+  const h = host({
+    mode: "pets",
+    pet: "cow",
+    weather: "night",
+    pixelSize: 2,
+    games: {},
+  });
+  t.after(h.dispose);
+  h.config["panel.autoSize"] = false;
+  await h.commands["petsadhd.pets"]();
+  const p = h.terminals[0].options.pty;
+  assert.equal(p.state.pixelSize, 1);
+  assert.equal(p.state.weather, "sunset");
+  p.handleInput("e");
+  const event = structuredClone(p.state.spaceEvent);
+  assert.ok(event && event.start === p.state.petFrame);
+  p.handleInput("m");
+  p.tick();
+  assert.deepEqual(p.state.spaceEvent, event);
+  assert.equal(p.state.petFrame, event.start);
+  h.terminals[0].dispose();
+  await h.commands["petsadhd.pets"]();
+  assert.deepEqual(h.terminals[1].options.pty.state.spaceEvent, event);
 });

@@ -64,7 +64,7 @@ test("the arcade chooser fits on exactly one line at narrow and wide sizes", () 
 const { scene, pose, pixelSize, menu } = require("../pet-scene");
 test("pets traverse the available width, face travel direction and retain their original dimensions", () => {
   for (const pet of Object.keys(sprites.art)) {
-    const width = Math.max(...sprites.chunky[pet].map((row) => row.length)) * 2;
+    const width = Math.max(...sprites.art[pet].map((row) => row.length));
     const positions = Array.from({ length: 450 }, (_, frame) =>
       pose(pet, 120, frame),
     );
@@ -81,25 +81,29 @@ test("pets traverse the available width, face travel direction and retain their 
     }
   }
 });
-test("night sky always has stars, Saturn rings and a galaxy, even with legacy weather settings", () => {
+test("detailed sunset has clouds, mountains, water and changing reflections regardless of old weather", () => {
   for (const weather of ["auto", "sun", "sunset", "rain", "night"]) {
-    const sky = scene({ pet: "dog", weather }, 120, 0);
-    assert.equal(sky.weather, "night");
+    const sky = scene({ pet: "dog", weather, spaceSeed: 1 }, 120, 0);
+    assert.equal(sky.weather, "sunset");
     assert.equal(sky.grid.length, 10);
-    assert.ok(sky.grid.flat().includes("#ecf2ff"));
-    assert.ok(sky.grid.flat().includes("#bfa485"));
-    assert.ok(sky.grid.flat().includes("#eee1ff"));
+    assert.ok(
+      new Set(sky.grid.flat()).size > 60,
+      "glow and clouds have varied colors",
+    );
+    assert.ok(sky.grid.flat().includes("#66536b"), "mountain ridgeline");
+    assert.ok(sky.grid.flat().includes("#ffc58b"), "water reflections");
     assert.deepEqual(
       sky.grid,
-      scene({ pet: "dog", weather: "night" }, 120, 0).grid,
+      scene({ pet: "dog", spaceSeed: 1 }, 120, 0).grid,
     );
   }
   assert.notDeepEqual(
     scene({ pet: "dog" }, 120, 0).grid,
     scene({ pet: "dog" }, 120, 8).grid,
   );
-  const fire = scene({ pet: "cow", petFire: 10 }, 120, 0);
-  assert.ok(fire.grid.flat().includes("#ed643d"));
+  assert.ok(
+    scene({ pet: "cow", petFire: 10 }, 120, 0).grid.flat().includes("#ed643d"),
+  );
 });
 test("dog and cow have distinct original sprites in two pixel sizes, each at most five lines high", () => {
   for (const pet of ["dog", "cow"])
@@ -115,15 +119,15 @@ test("dog and cow have distinct original sprites in two pixel sizes, each at mos
   assert.notDeepEqual(sprites.art.dog, sprites.art.cow);
   assert.ok(sprites.chunky.dog.join("").includes("T"), "teal collar");
   assert.ok(sprites.chunky.cow.join("").includes("P"), "pink muzzle");
-  assert.equal(pixelSize(undefined), 2);
+  assert.equal(pixelSize(undefined), 1);
 });
-test("single-line menu includes fire, pixel-size controls and night at every supported width", () => {
+test("single-line menu includes event, pixel-size controls and sunset at every supported width", () => {
   for (const columns of [24, 40, 60, 120]) {
     const line = menu({ pet: "cow", pixelSize: 2 }, columns, 0);
     assert.ok(line.length <= columns);
-    assert.match(line, /fire/i);
-    assert.match(line, /night/i);
+    assert.ok(line.includes("a") && line.includes("e"));
+    assert.match(line, /sunset/i);
     assert.ok(line.includes("s") && line.includes("?") && line.includes("m"));
-    assert.doesNotMatch(line, /w sky|sunset|rain/);
+    assert.doesNotMatch(line, /w sky|night|rain/);
   }
 });

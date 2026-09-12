@@ -121,8 +121,8 @@ const host = require("./host.cjs");
     await page.keyboard.press("n");
     await page.evaluate(() => window.inputDone);
     assert.equal(pty.state.pet, "dog");
-    assert.equal(pty.state.pixelSize, 2);
-    assert.equal(pty.state.weather, "night");
+    assert.equal(pty.state.pixelSize, 1);
+    assert.equal(pty.state.weather, "sunset");
     await page
       .locator("#terminal")
       .screenshot({ path: path.resolve("media/pets-preview.png") });
@@ -132,16 +132,36 @@ const host = require("./host.cjs");
     await page
       .locator("#terminal")
       .screenshot({ path: path.resolve("media/cow-preview.png") });
-    for (const key of ["s", "w", "a"]) {
+    for (const key of ["s", "a", "e"]) {
       await page.keyboard.press(key);
       await page.evaluate(() => window.inputDone);
     }
-    assert.equal(pty.state.pixelSize, 1);
+    assert.equal(pty.state.pixelSize, 2);
     assert.equal(pty.state.petFire, 10);
-    assert.equal(pty.state.weather, "night");
-    await page
-      .locator("#terminal")
-      .screenshot({ path: "/tmp/petsadhd-fine-cow.png" });
+    assert.ok(pty.state.spaceEvent);
+    assert.equal(pty.state.weather, "sunset");
+    // Stable event ages for visual inspection of each procedural effect.
+    pty.state.pixelSize = 1;
+    pty.state.petFire = 0;
+    pty.state.petFrame = 20;
+    for (const type of [
+      "blackhole",
+      "supernova",
+      "comet",
+      "aurora",
+      "saturn",
+    ]) {
+      pty.state.spaceEvent = { type, seed: 10, start: 0 };
+      t.output = "";
+      pty.redraw(true);
+      await page.evaluate(
+        (output) => new Promise((resolve) => term.write(output, resolve)),
+        t.output,
+      );
+      await page
+        .locator("#terminal")
+        .screenshot({ path: path.resolve(`media/${type}-preview.png`) });
+    }
     assert.deepEqual(errors, []);
     console.log(
       "PASS: xterm pixels, shared-keyboard controls, minimize/resume, stacked side layout, solo Tetris, a fire and pets",

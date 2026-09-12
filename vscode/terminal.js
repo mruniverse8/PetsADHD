@@ -1,10 +1,11 @@
 "use strict";
 const E = require("./media/engine");
 const { render } = require("./terminal-renderer");
+const space = require("./space-events");
 const modes = ["menu", "pets", "tetris", "duel", "invaders"];
 const help = {
   menu: "Choose 1 Pets, 2 Tetris, 3 Competitive Tetris, or 4 Invaders. Move the panel with PetsADHD: Move Game Panel.",
-  pets: "a: breathe fire. n: next pet (Rex, dog, cow, duck, 67). s: toggle fine/chunky pixels. Night sky: stars, Saturn, galaxies. Pets walk across the terminal at a fixed size. m: hide. Tab: menu.",
+  pets: "a: breathe fire. n: next pet (Rex, dog, cow, duck, 67). s: toggle fine/chunky pixels. e: summon a random space event. Sunset: clouds, mountains, reflections, occasional black holes, supernovas, comets, auroras and Saturn. Pets walk across the terminal at a fixed size. m: hide. Tab: menu.",
   tetris:
     "Arrows or h/j/k/l: move, soft drop, rotate. z: reverse rotate. Space: hard drop. + / -: speed 1–8.",
   duel: "Shared keyboard. P1: a/d move, s down, w/g rotate, f hard drop. P2: arrows, / reverse rotate, Enter hard drop. + / - changes both speeds.",
@@ -25,13 +26,17 @@ class ArcadeTerminal {
       pet: ["trex", "dog", "cow", "duck", "sixseven"].includes(saved.pet)
         ? saved.pet
         : options.pet || "trex",
-      weather: "night",
+      weather: "sunset",
+      appearanceVersion: 1,
+      spaceSeed: saved.spaceSeed || Math.floor(Math.random() * 0x7fffffff) + 1,
+      spaceEvent: saved.spaceEvent || null,
       pixelSize:
-        saved.pixelSize === 1 || saved.pixelSize === 2
+        saved.appearanceVersion === 1 &&
+        (saved.pixelSize === 1 || saved.pixelSize === 2)
           ? saved.pixelSize
-          : options.pixelSize === 1
-            ? 1
-            : 2,
+          : options.pixelSize === 2
+            ? 2
+            : 1,
       petFrame: Math.max(0, Math.floor(Number(saved.petFrame) || 0)),
       petFire: Math.max(0, Math.min(10, Number(saved.petFire) || 0)),
       musicOn: saved.musicOn ?? options.music,
@@ -214,6 +219,7 @@ class ArcadeTerminal {
     if (key === "M") this.state.musicOn = !this.state.musicOn;
     else if (this.state.mode === "pets") {
       if (key === "a" && this.playable) this.state.petFire = 10;
+      if (key === "e" && this.playable) space.summon(this.state);
       if (key === "n") {
         const pets = ["trex", "dog", "cow", "duck", "sixseven"];
         this.state.pet = pets[(pets.indexOf(this.state.pet) + 1) % pets.length];
