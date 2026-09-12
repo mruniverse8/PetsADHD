@@ -2,31 +2,66 @@
 
 Play pixel pets, Astra Tetris, shared-keyboard competitive Tetris, and Space
 Invaders directly in VS Code's **integrated Terminal panel**. Dock it at the
-bottom, left, or right and drag the panel edge to resize it.
+right by default; bottom and left docking are also available.
 
 ![Competitive Tetris terminal renderer preview](media/preview.png)
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.1.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.2.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
-3. Run **PetsADHD: Open / Resume Arcade**. A terminal named **PetsADHD** opens in the bottom panel.
-4. Press **1** for pets, **2** for Tetris, **3** for two-player Tetris, or **4** for Invaders.
+3. Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS). A terminal named **PetsADHD**
+   opens on the **right**, gains focus, expands for comfortable play, and starts Tetris.
+   If you already played a game, it resumes that game instead.
+4. Press **Tab** for the arcade menu: **1** pets, **2** Tetris, **3** two-player Tetris, **4** Invaders.
 
 You can also run **PetsADHD: Play Tetris**, **Play Competitive Tetris (2 Players)**,
 **Play Space Invaders**, or **Show Pixel Pets** directly from the Command Palette.
 VS Code 1.85 or newer is required. The extension is distributed as a VSIX and is
 not published to the Marketplace.
 
-Press **Ctrl+Alt+P** (**Cmd+Option+P** on macOS) to open the pixel pets
-panel directly, including after minimizing it with **m**. You can customize this
-shortcut in **Keyboard Shortcuts** by searching for **PetsADHD: Show Pixel Pets**.
+### Keyboard shortcuts
+
+| Action | Windows / Linux | macOS |
+| --- | --- | --- |
+| Open / resume the last game (Tetris on first use) | **Ctrl+Alt+G** | **Cmd+Option+G** |
+| Open pixel pets | **Ctrl+Alt+P** | **Cmd+Option+P** |
+| Hide and preserve the current game or pets | **m** inside the terminal | **m** inside the terminal |
+
+Both opening shortcuts automatically create or reveal the game terminal, dock it
+on the right by default, focus it, and adjust its size. No shell command or manual
+terminal creation is needed. The game shortcut remembers your last game even if
+you switched to pets. A manually paused game stays paused; press **p** to resume.
+
+Customize these shortcuts in **Keyboard Shortcuts** by searching for
+**PetsADHD: Open / Resume Game** or **PetsADHD: Show Pixel Pets**.
 
 ## Panel position and size
 
 Run **PetsADHD: Move Game Panel** and choose **Bottom**, **Left**, or **Right**.
-The preference is saved as `petsadhd.panel.position`. This moves VS Code's entire
-panel, including other terminals. Drag its edge to adjust the size.
+The default is **Right**; an explicitly saved preference takes priority. If you
+previously selected Bottom or Left, choose Right once with this command. Docking
+moves VS Code's entire panel, including other terminals.
+
+On opening, PetsADHD expands a side panel toward **72 terminal columns**, using
+the full available height. A bottom panel expands toward **28 rows**. Larger
+panels stay at their existing size. Expansion stops when VS Code cannot provide
+more room; small windows may still need enlarging. The game pauses while fitting.
+You can drag the panel edge after opening; the extension does not fight manual
+resizing during play.
+
+Optional VS Code settings:
+
+```json
+{
+  "petsadhd.panel.position": "right",
+  "petsadhd.panel.autoSize": true,
+  "petsadhd.panel.columns": 72,
+  "petsadhd.panel.rows": 28
+}
+```
+
+Set `petsadhd.panel.autoSize` to `false` to keep the existing panel size on opening.
 You can also use VS Code's [panel layout controls](https://code.visualstudio.com/docs/configure/custom-layout#_panel).
 
 Graphics use colored Unicode block characters in a native pseudoterminal.

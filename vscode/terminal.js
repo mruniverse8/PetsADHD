@@ -19,6 +19,7 @@ class ArcadeTerminal {
     const saved = options.saved || {};
     this.state = {
       version: 2,
+      lastGame: saved.lastGame,
       mode: modes.includes(saved.mode) ? saved.mode : "menu",
       games: saved.games || {},
       pet: ["trex", "dog", "duck", "sixseven"].includes(saved.pet)
@@ -52,7 +53,10 @@ class ArcadeTerminal {
     this.options.save(JSON.parse(JSON.stringify(this.state)));
   }
   open(dimensions) {
-    if (dimensions) this.dimensions = dimensions;
+    if (dimensions) {
+      this.dimensions = dimensions;
+      this.hasDimensions = true;
+    }
     this.ready = true;
     this.write.fire("\x1b[?1049h\x1b[?25l\x1b[?2004h\x1b[?7l\x1b[2J");
     this.redraw(true);
@@ -74,6 +78,7 @@ class ArcadeTerminal {
     this.write.dispose();
   }
   setDimensions(dimensions) {
+    this.hasDimensions = true;
     this.dimensions = dimensions;
     this.redraw(true);
   }
@@ -85,6 +90,8 @@ class ArcadeTerminal {
     if (modes.includes(mode)) this.state.mode = mode;
     this.hidden = false;
     this.focused = true;
+    if (["tetris", "duel", "invaders"].includes(this.state.mode))
+      this.state.lastGame = this.state.mode;
     this.ensure();
     this.save();
     this.redraw(true);
@@ -113,14 +120,22 @@ class ArcadeTerminal {
     if (output) this.write.fire(output);
     this.options.audio(
       this.state,
-      !this.focused ||
+      this.sizing ||
+        !this.focused ||
         !this.playable ||
         !!this.current()?.paused ||
         !!this.current()?.over,
     );
   }
   tick() {
-    if (!this.ready || this.hidden || !this.focused || !this.playable) return;
+    if (
+      this.sizing ||
+      !this.ready ||
+      this.hidden ||
+      !this.focused ||
+      !this.playable
+    )
+      return;
     this.frame++;
     const s = this.current();
     if (s) {

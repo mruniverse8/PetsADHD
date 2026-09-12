@@ -12,7 +12,7 @@ test("native terminal panel: shared keys, speed, minimize/resume, saved reopenin
     p = terminal.options.pty;
   assert.equal(terminal.options.location, h.api.TerminalLocation.Panel);
   assert.equal(terminal.options.isTransient, true);
-  assert.ok(h.executed.includes("workbench.action.positionPanelBottom"));
+  assert.ok(h.executed.includes("workbench.action.positionPanelRight"));
   p.handleInput("f\r+");
   assert.deepEqual(
     p.current().players.map((s) => [s.locks, s.speed]),
@@ -134,4 +134,24 @@ test("upgrade imports a minimized board and shutdown disposes the terminal", asy
     h.dispose();
   }
   assert.ok(h.terminals[0].disposed);
+});
+
+test("game shortcut starts Tetris and resumes the last game after pets or minimizing", async (t) => {
+  const h = host();
+  t.after(h.dispose);
+  await h.commands["petsadhd.play"]();
+  const p = h.terminals[0].options.pty;
+  assert.equal(p.state.mode, "tetris");
+  assert.ok(h.executed.includes("workbench.action.positionPanelRight"));
+  await h.commands["petsadhd.invaders"]();
+  p.handleInput("a");
+  await h.commands["petsadhd.pets"]();
+  const before = structuredClone(p.state.games.invaders);
+  assert.equal(p.state.mode, "pets");
+  p.handleInput("m");
+  await h.commands["petsadhd.play"]();
+  assert.equal(h.terminals.length, 1);
+  assert.equal(p.state.mode, "invaders");
+  assert.deepEqual(p.current(), before);
+  assert.equal(h.terminals[0].visible, true);
 });

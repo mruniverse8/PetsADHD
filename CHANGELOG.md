@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+- Default VS Code games and pets to a right-side terminal with automatic sizing (72 columns; 28 rows for bottom docking).
+- Add Ctrl+Alt+G / Cmd+Option+G to start Tetris or resume the last game, including after switching to pets.
+- Keep Ctrl+Alt+P / Cmd+Option+P for pets, and document shortcuts, automatic layout, and size settings.
+
 ## 0.3.1
 
 - Add Ctrl+Alt+P (Cmd+Option+P on macOS) to open the VS Code pixel pets panel.

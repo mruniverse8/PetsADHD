@@ -2,6 +2,7 @@
 const vscode = require("vscode");
 const { Music } = require("./audio");
 const { ArcadeTerminal } = require("./terminal");
+const { fitPanel } = require("./panel");
 function activate(context) {
   let terminal,
     pty,
@@ -43,7 +44,7 @@ function activate(context) {
     music.pause(paused);
     if (!paused) music.start();
   }
-  async function position(value = setting().get("panel.position", "bottom")) {
+  async function position(value = setting().get("panel.position", "right")) {
     const command = {
       bottom: "workbench.action.positionPanelBottom",
       left: "workbench.action.positionPanelLeft",
@@ -87,6 +88,12 @@ function activate(context) {
     }
     pty.select(mode);
     terminal.show(false);
+    await fitPanel(vscode, terminal, pty, {
+      autoSize: setting().get("panel.autoSize", true),
+      position: setting().get("panel.position", "right"),
+      columns: setting().get("panel.columns", 72),
+      rows: setting().get("panel.rows", 28),
+    });
   }
   for (const mode of ["open", "pets", "tetris", "duel", "invaders"])
     context.subscriptions.push(
@@ -95,6 +102,15 @@ function activate(context) {
       ),
     );
   context.subscriptions.push(
+    vscode.commands.registerCommand("petsadhd.play", () => {
+      const state = pty?.state || context.workspaceState.get("arcade");
+      const mode = ["tetris", "duel", "invaders"].includes(state?.mode)
+        ? state.mode
+        : ["tetris", "duel", "invaders"].includes(state?.lastGame)
+          ? state.lastGame
+          : "tetris";
+      return open(mode);
+    }),
     vscode.commands.registerCommand("petsadhd.position", async () => {
       const chosen = await vscode.window.showQuickPick(
         ["Bottom", "Left", "Right"],
