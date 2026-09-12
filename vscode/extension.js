@@ -25,7 +25,7 @@ function activate(context) {
               )
             : setting().get(
                 "music.url",
-                "https://www.youtube.com/watch?v=z0FRc-51_V4",
+                "https://www.youtube.com/watch?v=oor2uIqys8M",
               ),
       volume: setting().get("music.volume", 25),
       extractor: setting().get("music.extractor", ""),

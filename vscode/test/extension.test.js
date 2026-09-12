@@ -67,6 +67,7 @@ test("native terminal panel: shared keys, speed, minimize/resume, saved reopenin
 test("resize and focus pause simulation; fragmented arrows, a fire, tracks and explicit quit", async (t) => {
   const h = host();
   t.after(h.dispose);
+  delete h.config["music.url"]; // Exercise the extension's default fallback.
   await h.commands["petsadhd.tetris"]();
   const p = h.terminals[0].options.pty;
   assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=oor2uIqys8M");
@@ -93,7 +94,7 @@ test("resize and focus pause simulation; fragmented arrows, a fire, tracks and e
   await h.commands["petsadhd.open"]();
   assert.equal(p.current().paused, true);
   await h.commands["petsadhd.invaders"]();
-  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=z0FRc-51_V4");
+  assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=oor2uIqys8M");
   p.handleInput("a");
   assert.equal(p.current().shots.length, 1);
   p.handleInput("q");

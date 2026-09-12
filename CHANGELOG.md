@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.10
+
+- Use the same default music for pets, Tetris, competitive Tetris and Invaders in VS Code and Neovim.
+- Keep custom soundtrack settings and music controls available in both editors.
+
 ## 0.3.9
 
 - Add `:PetTerminal` / `:PetsADHDTerminal` and `<leader>uP` to open or resume an eight-row bottom terminal.

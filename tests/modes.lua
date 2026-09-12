@@ -99,7 +99,7 @@ for _, command in ipairs({ "Tetris", "TetrisDuel", "SpaceInvaders" }) do
       "both Tetris modes use the requested default soundtrack"
     )
   else
-    assert(audio[#audio].options.url == nil, "Invaders keeps its own default soundtrack")
+    assert(audio[#audio].options.url == nil, "Invaders uses the shared audio default")
   end
   local b, w = vim.api.nvim_get_current_buf(), vim.api.nvim_get_current_win()
   local key = maps(b)

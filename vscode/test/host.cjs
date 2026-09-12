@@ -24,7 +24,7 @@ module.exports = function host(saved) {
     configuration = new EventEmitter();
   const config = {
     "music.enabled": true,
-    "music.url": "https://www.youtube.com/watch?v=z0FRc-51_V4",
+    "music.url": "https://www.youtube.com/watch?v=oor2uIqys8M",
     "music.volume": 25,
     "tetris.speed": 1,
   };
