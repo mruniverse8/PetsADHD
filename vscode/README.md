@@ -8,7 +8,7 @@ bottom with right alignment by default; side docking is also available.
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.4.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.5.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
 3. Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS). A terminal named **PetsADHD**
    opens at the **bottom with right alignment**, gains focus, expands for play, and starts Tetris.
@@ -47,12 +47,22 @@ editor area and extends toward the right edge; it is not a separate floating
 corner terminal. Docking affects the entire panel, including other terminals.
 See VS Code's [panel layout controls](https://code.visualstudio.com/docs/configure/custom-layout#_panel).
 
-**Pets always stay tiny.** The default is a **one-line ASCII companion** on a thin
-baseline. For example, the duck is `__(o)>` and the number pet is `6 7`.
-Set `petsadhd.pets.style` to `"pixels"` for hand-drawn miniature sprites only
-**three terminal lines tall**. Both styles stay at the bottom right and never
-scale up, even in a large window. The previous `petsadhd.pets.size` setting no
-longer enlarges pets.
+**Pets are colored pixel art, at most five terminal lines tall.** The T-rex,
+dog, duck, and readable 67 each use a fixed miniature sprite. They never grow
+with the panel. ASCII pet faces and the previous style/size settings are removed.
+
+Pets have a thin baseline and **one menu line**, with no separate title, status,
+or extra control rows. The arcade chooser also uses a single line:
+
+```text
+1 Pets  2 Tetris  3 Duel  4 Invaders | n pet w sky m hide ? help
+```
+
+Press **1–4** to switch directly between modes without losing game progress.
+**n** changes the pet and **w** changes the weather while pets are shown.
+Labels shorten in narrow panels; **?** shows the full controls.
+
+![Five-line pixel pet and one-line menu](media/pets-preview.png)
 
 Opening pets adjusts the bottom panel toward **8 rows**, subject to VS Code's
 minimum size and resize increments. Opening a game expands it toward **28 rows**.
@@ -65,7 +75,6 @@ Optional VS Code settings:
 ```json
 {
   "petsadhd.panel.position": "bottom-right",
-  "petsadhd.pets.style": "line",
   "petsadhd.panel.autoSize": true,
   "petsadhd.panel.columns": 72,
   "petsadhd.panel.rows": 28
@@ -88,8 +97,7 @@ the game and audio suspend until the panel is enlarged.
 
 | Mode | Minimum terminal size (columns × rows) |
 | --- | --- |
-| One-line pets | 24 × 6 |
-| Tiny pixel pets | 24 × 8 |
+| Pixel pets and one-line menu | 24 × 7 |
 | Solo Tetris | 28 × 16 |
 | Competitive Tetris, side by side | 56 × 16 |
 | Competitive Tetris, stacked | 28 × 28 |

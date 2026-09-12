@@ -157,3 +157,22 @@ test("game shortcut starts Tetris and resumes the last game after pets or minimi
   assert.deepEqual(p.current(), before);
   assert.equal(h.terminals[0].visible, true);
 });
+
+test("inline navigation selects games from pets and preserves a board through the one-line menu", async (t) => {
+  const h = host();
+  t.after(h.dispose);
+  h.config["panel.autoSize"] = false;
+  await h.commands["petsadhd.pets"]();
+  const p = h.terminals[0].options.pty;
+  p.handleInput("2 ");
+  assert.equal(p.state.mode, "tetris");
+  const board = structuredClone(p.current());
+  assert.equal(board.locks, 1);
+  p.handleInput("1\t2");
+  assert.equal(p.state.mode, "tetris");
+  assert.deepEqual(p.current(), board);
+  p.handleInput("3");
+  assert.equal(p.state.mode, "duel");
+  p.handleInput("4");
+  assert.equal(p.state.mode, "invaders");
+});

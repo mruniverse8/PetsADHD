@@ -4,14 +4,14 @@ Pixel pets and a tiny arcade for **Neovim / LazyVim and VS Code**. Includes anim
 sidebar companions, Astra Tetris, shared-keyboard competitive Tetris, and Space
 Invaders with optional music.
 
-**VS Code:** [download the VSIX](dist/PetsADHD-0.3.4.vsix), then run **Extensions:
+**VS Code:** [download the VSIX](dist/PetsADHD-0.3.5.vsix), then run **Extensions:
 Install from VSIX**. Games run as pixel graphics in the integrated Terminal panel.
 Use **PetsADHD: Move Game Panel** to choose Bottom Right, Bottom, Left, or Right.
 Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS) to open or resume a game
 in a **bottom panel aligned right**, automatically expanded for play.
-First use starts Tetris. **Ctrl+Alt+P** (**Cmd+Option+P**) opens tiny one-line pets
-at the bottom right, with a panel targeting eight rows. Optional pixel pets are
-just three terminal lines tall; neither style grows with the panel.
+First use starts Tetris. **Ctrl+Alt+P** (**Cmd+Option+P**) opens miniature pixel-art pets
+at the bottom right, with a panel targeting eight rows. Pets use at most five
+terminal lines, with a single menu row; they never grow with the panel.
 Press **m** to hide and preserve the session; use its shortcut to reopen.
 See [VS Code instructions](vscode/README.md).
 

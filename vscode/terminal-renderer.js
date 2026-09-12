@@ -54,21 +54,15 @@ function render(state, dimensions, frame = 0, suspended = false) {
     duel: "TETRIS / 2 PLAYERS",
     invaders: "SPACE INVADERS",
   }[mode];
-  text(0, 0, `PetsADHD / ${title}`, "#8bd5ef");
-  text(0, rows - 2, "m hide  p pause  r restart  M music", BORDER);
-  text(0, rows - 1, "Tab menu  ? controls  q quit", BORDER);
+  const compactUI = mode === "pets" || mode === "menu";
+  if (!compactUI) {
+    text(0, 0, `PetsADHD / ${title}`, "#8bd5ef");
+    text(0, rows - 2, "m hide  p pause  r restart  M music", BORDER);
+    text(0, rows - 1, "Tab menu  ? controls  q quit", BORDER);
+  }
   let playable = true;
   if (mode === "menu") {
-    [
-      "1  Pixel pets",
-      "2  Astra Tetris",
-      "3  Competitive Tetris",
-      "   Two players / one keyboard",
-      "4  Space Invaders",
-      "",
-      "Choose a number to play.",
-      "Dock: PetsADHD: Move Game Panel",
-    ].forEach((line, i) => text(2, i + 3, line));
+    // The shared navigation bar below is the entire menu.
   } else if (mode === "tetris" || mode === "duel") {
     const dual = mode === "duel",
       wide = rows >= 26 && cols >= (dual ? 84 : 42);
@@ -164,35 +158,29 @@ function render(state, dimensions, frame = 0, suspended = false) {
       else pixels(grid, x + 1, 3);
     } else text(0, 3, "Resize: 68 columns x 18 rows minimum");
   } else if (mode === "pets") {
-    const pixelStyle = state.petStyle === "pixels";
-    const minRows = pixelStyle ? 8 : 6;
-    playable = cols >= 24 && rows >= minRows;
+    playable = cols >= 24 && rows >= 7;
     if (playable) {
       const pet = sprites.art[state.pet] ? state.pet : "trex";
-      const art = sprites.art[pet];
-      const width = pixelStyle ? art[0].length : sprites.lines[pet].length;
+      const source = sprites.art[pet];
+      const width = Math.max(...source.map((row) => row.length));
+      const art = source.map((row) => row.padEnd(width, " "));
       const habitatWidth = 20,
         origin = cols - habitatWidth - 1;
       const span = habitatWidth - width;
       const phase = Math.floor(frame / 4) % (span * 2);
       const x = origin + Math.min(phase, span * 2 - phase);
-      const floor = rows - 3;
-      if (pixelStyle) {
-        pixels(
-          art.map((row) => [...row].map((c) => sprites.palette[c])),
-          x,
-          floor - 3,
-        );
-      } else text(x, floor - 1, sprites.lines[pet], sprites.colors[pet]);
+      const floor = rows - 2;
+      pixels(
+        art.map((row) => [...row].map((c) => sprites.palette[c])),
+        x,
+        floor - 5,
+      );
       const rain =
         state.weather === "rain" ||
         (state.weather === "auto" && frame % 180 > 110);
-      // The narrow baseline carries the weather without a large sky or lawn.
       text(origin, floor, "─".repeat(habitatWidth), BORDER);
       put(cols - 2, floor, rain ? "/" : "*", rain ? BORDER : "#eed49f");
-      text(0, rows - 2, " ".repeat(cols));
-      text(0, rows - 2, "n pet  w sky  m hide", BORDER);
-    } else text(0, 3, `Resize: 24 columns x ${minRows} rows`);
+    } else text(0, 0, "Resize: 24 cols x 7 rows");
   }
   const status = !playable
     ? "PAUSED / enlarge the panel"
@@ -211,7 +199,21 @@ function render(state, dimensions, frame = 0, suspended = false) {
             : mode === "pets"
               ? `${state.pet} / ${state.weather}`
               : "";
-  text(0, 1, status, "#eed49f");
+  if (!compactUI) text(0, 1, status, "#eed49f");
+  else {
+    let choices =
+      cols >= 64
+        ? "1 Pets  2 Tetris  3 Duel  4 Invaders | n pet w sky m hide ? help"
+        : cols >= 40
+          ? "1 Pets 2 Tetris 3 Duel 4 Inv | n w m ?"
+          : "1Pet 2Tet 3D 4Inv n/w m?";
+    if (mode === "menu")
+      choices = choices
+        .replace("n pet w sky ", "")
+        .replace("n w ", "")
+        .replace("n/w ", "");
+    text(0, rows - 1, choices, "#8bd5ef");
+  }
   const lines = screen.map((row) => {
     let fg,
       bg,

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.5
+
+- Replace ASCII pets with hand-drawn pixel sprites at most five terminal lines tall.
+- Condense pet navigation and the arcade chooser to one menu line.
+- Add direct 1–4 navigation from any mode while preserving games.
+- Remove pet style/size overrides so older preferences cannot restore oversized or ASCII pets.
+
 ## 0.3.4
 
 - Make VS Code pets permanently tiny: one-line ASCII companions by default, with optional three-line pixel sprites.

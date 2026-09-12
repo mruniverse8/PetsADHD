@@ -109,16 +109,18 @@ const host = require("./host.cjs");
         .locator("#terminal")
         .screenshot({ path: `/tmp/petsadhd-${mode}-terminal.png` });
     }
-    pty.state.petStyle = "pixels";
-    t.output = "";
-    pty.redraw(true);
-    await page.evaluate(
-      (output) => new Promise((resolve) => term.write(output, resolve)),
-      t.output,
-    );
+    await page.keyboard.press("Tab");
+    await page.evaluate(() => window.inputDone);
+    assert.equal(pty.state.mode, "menu");
     await page
       .locator("#terminal")
-      .screenshot({ path: "/tmp/petsadhd-tiny-pixels-terminal.png" });
+      .screenshot({ path: "/tmp/petsadhd-menu-terminal.png" });
+    await page.keyboard.press("1");
+    await page.evaluate(() => window.inputDone);
+    assert.equal(pty.state.mode, "pets");
+    await page
+      .locator("#terminal")
+      .screenshot({ path: path.resolve("media/pets-preview.png") });
     assert.deepEqual(errors, []);
     console.log(
       "PASS: xterm pixels, shared-keyboard controls, minimize/resume, stacked side layout, solo Tetris, a fire and pets",

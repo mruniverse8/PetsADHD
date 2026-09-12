@@ -26,7 +26,6 @@ class ArcadeTerminal {
         ? saved.pet
         : options.pet || "trex",
       weather: saved.weather || "auto",
-      petStyle: options.petStyle || "line",
       musicOn: saved.musicOn ?? options.music,
     };
     // Import minimized games from the old extension without resetting a board.
@@ -184,22 +183,22 @@ class ArcadeTerminal {
   }
   key(key) {
     this.focused = true;
+    const selectedMode = { 1: "pets", 2: "tetris", 3: "duel", 4: "invaders" }[
+      key
+    ];
+    if (selectedMode) return this.select(selectedMode);
     if (key === "m") return this.minimize();
     if (key === "?")
       return this.options.help(
         help[this.state.mode] +
-          " All games: p pause, r restart, m hide/resume, M music, Tab menu, q discard current game.",
+          " 1: pets, 2: Tetris, 3: two-player Tetris, 4: Invaders. All games: p pause, r restart, m hide/resume, M music, Tab menu, q discard current game.",
       );
     if (key === "\t") return this.select("menu");
     if (key === "q" || key === "\x03") {
       delete this.state.games[this.state.mode];
       return this.select("menu");
     }
-    if (this.state.mode === "menu") {
-      const mode = { 1: "pets", 2: "tetris", 3: "duel", 4: "invaders" }[key];
-      if (mode) this.select(mode);
-      return;
-    }
+    if (this.state.mode === "menu") return;
     if (key === "M") this.state.musicOn = !this.state.musicOn;
     else if (this.state.mode === "pets") {
       if (key === "n") {
