@@ -8,6 +8,7 @@ const fs = require("node:fs"),
 const host = require("./host.cjs");
 (async () => {
   const h = host();
+  h.config["panel.autoSize"] = false;
   await h.commands["petsadhd.duel"]();
   const t = h.terminals[0],
     pty = t.options.pty;

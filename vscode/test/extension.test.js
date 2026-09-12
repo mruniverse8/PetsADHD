@@ -12,7 +12,8 @@ test("native terminal panel: shared keys, speed, minimize/resume, saved reopenin
     p = terminal.options.pty;
   assert.equal(terminal.options.location, h.api.TerminalLocation.Panel);
   assert.equal(terminal.options.isTransient, true);
-  assert.ok(h.executed.includes("workbench.action.positionPanelRight"));
+  assert.ok(h.executed.includes("workbench.action.positionPanelBottom"));
+  assert.ok(h.executed.includes("workbench.action.alignPanelRight"));
   p.handleInput("f\r+");
   assert.deepEqual(
     p.current().players.map((s) => [s.locks, s.speed]),
@@ -142,7 +143,8 @@ test("game shortcut starts Tetris and resumes the last game after pets or minimi
   await h.commands["petsadhd.play"]();
   const p = h.terminals[0].options.pty;
   assert.equal(p.state.mode, "tetris");
-  assert.ok(h.executed.includes("workbench.action.positionPanelRight"));
+  assert.ok(h.executed.includes("workbench.action.positionPanelBottom"));
+  assert.ok(h.executed.includes("workbench.action.alignPanelRight"));
   await h.commands["petsadhd.invaders"]();
   p.handleInput("a");
   await h.commands["petsadhd.pets"]();

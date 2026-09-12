@@ -44,13 +44,22 @@ function activate(context) {
     music.pause(paused);
     if (!paused) music.start();
   }
-  async function position(value = setting().get("panel.position", "right")) {
+  async function position(
+    value = setting().get("panel.position", "bottom-right"),
+  ) {
     const command = {
       bottom: "workbench.action.positionPanelBottom",
+      "bottom-right": "workbench.action.positionPanelBottom",
       left: "workbench.action.positionPanelLeft",
       right: "workbench.action.positionPanelRight",
     }[value];
     if (command) await vscode.commands.executeCommand(command);
+    if (value === "bottom-right" || value === "bottom")
+      await vscode.commands.executeCommand(
+        value === "bottom-right"
+          ? "workbench.action.alignPanelRight"
+          : "workbench.action.alignPanelCenter",
+      );
   }
   async function open(mode) {
     await position();
@@ -60,6 +69,12 @@ function activate(context) {
         saved: context.workspaceState.get("arcade"),
         pet: context.globalState.get("pet", "trex"),
         speed: setting().get("tetris.speed", 1),
+        petSize: setting().get("pets.size", "small"),
+        fit: () => {
+          void resize().catch((error) =>
+            vscode.window.showWarningMessage("PetsADHD: " + error.message),
+          );
+        },
         music: setting().get("music.enabled", true),
         save: (state) => {
           void context.workspaceState.update("arcade", state);
@@ -86,13 +101,19 @@ function activate(context) {
         iconPath: new vscode.ThemeIcon("game"),
       });
     }
-    pty.select(mode);
+    pty.select(mode, false);
     terminal.show(false);
+    await resize();
+  }
+  async function resize() {
+    if (!pty || !terminal) return;
+    const compact = pty.state.mode === "pets" && pty.state.petSize !== "large";
     await fitPanel(vscode, terminal, pty, {
       autoSize: setting().get("panel.autoSize", true),
-      position: setting().get("panel.position", "right"),
-      columns: setting().get("panel.columns", 72),
-      rows: setting().get("panel.rows", 28),
+      position: setting().get("panel.position", "bottom-right"),
+      columns: compact ? 40 : setting().get("panel.columns", 72),
+      rows: compact ? 16 : setting().get("panel.rows", 28),
+      shrink: compact,
     });
   }
   for (const mode of ["open", "pets", "tetris", "duel", "invaders"])
@@ -113,7 +134,7 @@ function activate(context) {
     }),
     vscode.commands.registerCommand("petsadhd.position", async () => {
       const chosen = await vscode.window.showQuickPick(
-        ["Bottom", "Left", "Right"],
+        ["Bottom Right", "Bottom", "Left", "Right"],
         {
           title: "PetsADHD: Move Game Panel",
           placeHolder:
@@ -123,7 +144,7 @@ function activate(context) {
       if (!chosen) return;
       await setting().update(
         "panel.position",
-        chosen.toLowerCase(),
+        chosen.toLowerCase().replace(" ", "-"),
         vscode.ConfigurationTarget.Global,
       );
       await open();
@@ -142,6 +163,7 @@ function activate(context) {
         music.stop();
         lastAudio = "";
         if (pty) {
+          pty.state.petSize = setting().get("pets.size", "small");
           if (event.affectsConfiguration("petsadhd.music.enabled"))
             pty.state.musicOn = setting().get("music.enabled", true);
           pty.redraw();

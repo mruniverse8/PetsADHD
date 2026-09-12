@@ -15,13 +15,20 @@ function fixture(position = "right") {
     commands: {
       async executeCommand(name) {
         calls.push(name);
-        if (name === "workbench.action.increaseViewSize") {
+        if (
+          [
+            "workbench.action.increaseViewSize",
+            "workbench.action.decreaseViewSize",
+          ].includes(name)
+        ) {
           assert.equal(
             session.sizing,
             true,
             "game stays suspended while fitting",
           );
-          session.dimensions[position === "bottom" ? "rows" : "columns"] += 6;
+          session.dimensions[
+            position.startsWith("bottom") ? "rows" : "columns"
+          ] += name === "workbench.action.increaseViewSize" ? 6 : -6;
         }
       },
     },
@@ -102,4 +109,31 @@ test("docking dimensions replace the old wide bottom-panel measurement before fi
     f.session.dimensions.columns = 32;
   });
   assert.ok(f.session.dimensions.columns >= 72);
+});
+
+test("small pets shrink a bottom-right panel, then games regain their playable height", async () => {
+  const f = fixture("bottom-right");
+  f.session.dimensions.rows = 40;
+  f.options.rows = 16;
+  f.options.shrink = true;
+  await f.fit();
+  assert.equal(f.session.dimensions.rows, 16);
+  assert.ok(f.calls.includes("workbench.action.decreaseViewSize"));
+  f.options.rows = 28;
+  f.options.shrink = false;
+  await f.fit();
+  assert.equal(f.session.dimensions.rows, 28);
+});
+
+test("a shrink step that clips the pet is reversed once without oscillating", async () => {
+  const f = fixture("bottom-right");
+  f.session.dimensions.rows = 32;
+  f.options.rows = 16;
+  f.options.shrink = true;
+  await f.fit();
+  assert.equal(f.session.dimensions.rows, 20);
+  assert.equal(
+    f.calls.filter((c) => c === "workbench.action.increaseViewSize").length,
+    1,
+  );
 });

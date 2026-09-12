@@ -164,10 +164,11 @@ function render(state, dimensions, frame = 0, suspended = false) {
       else pixels(grid, x + 1, 3);
     } else text(0, 3, "Resize: 68 columns x 18 rows minimum");
   } else if (mode === "pets") {
-    playable = cols >= 28 && rows >= 16;
+    const small = state.petSize !== "large";
+    playable = cols >= 28 && rows >= 15;
     if (playable) {
-      const w = cols - 2,
-        h = (rows - 5) * 2;
+      const w = Math.min(cols - 2, small ? 40 : 64),
+        h = Math.min((rows - 5) * 2, small ? 20 : 38);
       const grid = Array.from({ length: h }, (_, y) =>
         Array(w).fill(y >= h - 2 ? "#263d39" : null),
       );
@@ -182,7 +183,7 @@ function render(state, dimensions, frame = 0, suspended = false) {
           for (let x = w - 7; x < w - 3; x++) grid[y][x] = "#eed49f";
       const art = sprites.art[state.pet] || sprites.art.trex;
       const size = Math.min(
-        2,
+        small ? 1 : 2,
         Math.max(1, Math.floor((h - 4) / art.length)),
         Math.max(1, Math.floor((w - 2) / art[0].length)),
       );
@@ -200,9 +201,10 @@ function render(state, dimensions, frame = 0, suspended = false) {
                   sprites.palette[c];
         }),
       );
-      pixels(grid, 1, 2);
+      pixels(grid, cols - w - 1, rows - 3 - h / 2);
+      text(0, rows - 2, " ".repeat(cols));
       text(0, rows - 2, "n next pet  w weather  m hide", BORDER);
-    } else text(0, 3, "Resize: 28 columns x 16 rows minimum");
+    } else text(0, 3, "Resize: 28 columns x 15 rows minimum");
   }
   const status = !playable
     ? "PAUSED / enlarge the panel"

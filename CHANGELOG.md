@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3
+
+- Add small VS Code pets that stay at native pixel size in a compact bottom-right habitat.
+- Default to a bottom panel with right alignment; add Bottom Right to the panel chooser.
+- Fit small pets into a shorter panel and expand again when switching to a game.
+- Add a pet size setting and tests for compact sprites, shrinking, and restoring game space.
+
 ## 0.3.2
 
 - Default VS Code games and pets to a right-side terminal with automatic sizing (72 columns; 28 rows for bottom docking).

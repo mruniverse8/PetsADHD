@@ -26,6 +26,7 @@ class ArcadeTerminal {
         ? saved.pet
         : options.pet || "trex",
       weather: saved.weather || "auto",
+      petSize: options.petSize || "small",
       musicOn: saved.musicOn ?? options.music,
     };
     // Import minimized games from the old extension without resetting a board.
@@ -86,7 +87,7 @@ class ArcadeTerminal {
     this.focused = focused;
     this.redraw();
   }
-  select(mode) {
+  select(mode, fit = true) {
     if (modes.includes(mode)) this.state.mode = mode;
     this.hidden = false;
     this.focused = true;
@@ -95,6 +96,7 @@ class ArcadeTerminal {
     this.ensure();
     this.save();
     this.redraw(true);
+    if (fit) this.options.fit?.();
   }
   minimize() {
     this.hidden = true;

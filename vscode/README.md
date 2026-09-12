@@ -2,16 +2,16 @@
 
 Play pixel pets, Astra Tetris, shared-keyboard competitive Tetris, and Space
 Invaders directly in VS Code's **integrated Terminal panel**. Dock it at the
-right by default; bottom and left docking are also available.
+bottom with right alignment by default; side docking is also available.
 
 ![Competitive Tetris terminal renderer preview](media/preview.png)
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.2.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.3.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
 3. Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS). A terminal named **PetsADHD**
-   opens on the **right**, gains focus, expands for comfortable play, and starts Tetris.
+   opens at the **bottom with right alignment**, gains focus, expands for play, and starts Tetris.
    If you already played a game, it resumes that game instead.
 4. Press **Tab** for the arcade menu: **1** pets, **2** Tetris, **3** two-player Tetris, **4** Invaders.
 
@@ -29,7 +29,7 @@ not published to the Marketplace.
 | Hide and preserve the current game or pets | **m** inside the terminal | **m** inside the terminal |
 
 Both opening shortcuts automatically create or reveal the game terminal, dock it
-on the right by default, focus it, and adjust its size. No shell command or manual
+at the bottom with right alignment by default, focus it, and adjust its size. No shell command or manual
 terminal creation is needed. The game shortcut remembers your last game even if
 you switched to pets. A manually paused game stays paused; press **p** to resume.
 
@@ -38,31 +38,41 @@ Customize these shortcuts in **Keyboard Shortcuts** by searching for
 
 ## Panel position and size
 
-Run **PetsADHD: Move Game Panel** and choose **Bottom**, **Left**, or **Right**.
-The default is **Right**; an explicitly saved preference takes priority. If you
-previously selected Bottom or Left, choose Right once with this command. Docking
-moves VS Code's entire panel, including other terminals.
+Run **PetsADHD: Move Game Panel** and choose **Bottom Right**, **Bottom**, **Left**,
+or **Right**. **Bottom Right** is the new default. If you previously saved another
+position, choose Bottom Right once to replace that preference.
 
-On opening, PetsADHD expands a side panel toward **72 terminal columns**, using
-the full available height. A bottom panel expands toward **28 rows**. Larger
-panels stay at their existing size. Expansion stops when VS Code cannot provide
-more room; small windows may still need enlarging. The game pauses while fitting.
-You can drag the panel edge after opening; the extension does not fight manual
-resizing during play.
+Bottom Right uses VS Code's bottom panel with right alignment. It still spans the
+editor area and extends toward the right edge; it is not a separate floating
+corner terminal. Docking affects the entire panel, including other terminals.
+See VS Code's [panel layout controls](https://code.visualstudio.com/docs/configure/custom-layout#_panel).
+
+**Pets are small by default.** They keep their native pixel size and stay in a
+compact habitat at the bottom right inside the terminal. They no longer grow with
+the window. Select `petsadhd.pets.size: "large"` to restore larger sprites.
+
+Opening small pets adjusts the bottom panel toward **16 rows**, allowing a few
+extra rows for VS Code's resize increments. Opening a game expands it toward
+**28 rows**. Left/right panels use a width target of **40 columns** for small pets
+and **72 columns** for games. Switching modes through the menu also adjusts the
+size while preserving games. Expansion stops at the available window space.
 
 Optional VS Code settings:
 
 ```json
 {
-  "petsadhd.panel.position": "right",
+  "petsadhd.panel.position": "bottom-right",
+  "petsadhd.pets.size": "small",
   "petsadhd.panel.autoSize": true,
   "petsadhd.panel.columns": 72,
   "petsadhd.panel.rows": 28
 }
 ```
 
-Set `petsadhd.panel.autoSize` to `false` to keep the existing panel size on opening.
-You can also use VS Code's [panel layout controls](https://code.visualstudio.com/docs/configure/custom-layout#_panel).
+The columns/rows settings control the game size; small pets use the compact targets
+above. Set `petsadhd.panel.autoSize` to `false` to keep your manually chosen size.
+You can also drag the panel edge during play; automatic fitting only runs when
+opening or switching modes.
 
 Graphics use colored Unicode block characters in a native pseudoterminal.
 There are no webviews, browser pages, editor tabs, or canvas game surfaces.
@@ -75,7 +85,8 @@ the game and audio suspend until the panel is enlarged.
 
 | Mode | Minimum terminal size (columns × rows) |
 | --- | --- |
-| Pets or solo Tetris | 28 × 16 |
+| Pets | 28 × 15 |
+| Solo Tetris | 28 × 16 |
 | Competitive Tetris, side by side | 56 × 16 |
 | Competitive Tetris, stacked | 28 × 28 |
 | Space Invaders | 68 × 18 |
