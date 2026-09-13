@@ -4,6 +4,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { ArcadeTerminal } = require("./terminal");
+const pets = require("./pet-scene");
 class EventEmitter {
   listeners = new Set();
   event = (fn) => {
@@ -77,10 +78,10 @@ function main() {
       audio: (state, paused) => {
         const value = JSON.stringify({
           kind: "audio",
-          mode: state.mode,
+          mode: state.mode === "menu" ? "pets" : state.mode,
           enabled:
             !!state.musicOn &&
-            ["pets", "tetris", "duel", "invaders"].includes(state.mode),
+            ["pets", "menu", "tetris", "duel", "invaders"].includes(state.mode),
           paused: !!paused,
         });
         if (value !== lastAudio) {
@@ -91,7 +92,12 @@ function main() {
       hide: () => {
         if (!hostHiding) request({ kind: "hide" });
       },
-      fit: () => request({ kind: "mode", mode: session.state.mode }),
+      fit: () =>
+        request({
+          kind: "mode",
+          mode: session.state.mode,
+          rows: pets.rows(session.state),
+        }),
       help: (message) => request({ kind: "help", message }),
       closed: () => {},
     },
@@ -99,7 +105,7 @@ function main() {
   session.onDidWrite((data) => process.stdout.write(data));
   const dimensions = () => ({
     columns: process.stdout.columns || 80,
-    rows: process.stdout.rows || 8,
+    rows: process.stdout.rows || 4,
   });
   process.stdin.setRawMode?.(true);
   process.stdin.setEncoding("utf8");

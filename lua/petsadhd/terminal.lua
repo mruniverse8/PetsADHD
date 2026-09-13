@@ -1,4 +1,4 @@
--- A real bottom terminal, sharing the five-line pixel renderer with VS Code.
+-- A real bottom terminal, sharing the compact pixel renderer with VS Code.
 local M = {}
 local config, session
 local root = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h:h:h")
@@ -25,7 +25,7 @@ local function fit(s)
   end
   s.win = win
   local compact = s.mode == "pets" or s.mode == "menu"
-  local height = compact and config.height or config.game_height
+  local height = compact and math.max(config.height, s.pet_rows or 4) or config.game_height
   -- Leave room for the editor, tab/status/command lines and other splits.
   height = math.min(height, math.max(1, vim.o.lines - 6))
   pcall(vim.api.nvim_win_set_height, win, height)
@@ -138,6 +138,7 @@ local function watch(s)
           end
         elseif value.kind == "mode" and modes[value.mode] then
           s.mode = value.mode
+          s.pet_rows = value.rows == 5 and 5 or 4
           fit(s)
         elseif value.kind == "audio" and modes[value.mode] then
           audio(s, value)
@@ -320,8 +321,8 @@ function M.toggle()
 end
 
 function M.setup(opts)
-  config = vim.tbl_extend("force", { height = 8, game_height = 18, pixel_size = 1, speed = 1 }, opts or {})
-  config.height = math.max(7, math.floor(tonumber(config.height) or 8))
+  config = vim.tbl_extend("force", { height = 4, game_height = 18, pixel_size = 1, speed = 1 }, opts or {})
+  config.height = math.max(4, math.floor(tonumber(config.height) or 4))
   config.game_height = math.max(16, math.floor(tonumber(config.game_height) or 18))
   for _, name in ipairs({ "PetTerminal", "PetsADHDTerminal" }) do
     vim.api.nvim_create_user_command(name, function(args)

@@ -11,6 +11,13 @@ test("pet music defaults, toggle, minimize/resume, custom track and workspace tr
   await h.commands["petsadhd.pets"]();
   const p = h.terminals[0].options.pty;
   assert.equal(h.tracks.at(-1), "https://www.youtube.com/watch?v=5vaaOqLHxrE");
+  const musicBeforeMenu = h.tracks.length;
+  p.handleInput("\t\t");
+  assert.equal(
+    h.tracks.length,
+    musicBeforeMenu,
+    "expanding the right menu keeps the same music playing",
+  );
   p.handleInput("m");
   assert.equal(h.tracks.at(-1), "pause");
   await h.commands["petsadhd.pets"]();
@@ -180,7 +187,7 @@ test("game shortcut starts Tetris and resumes the last game after pets or minimi
   assert.equal(h.terminals[0].visible, true);
 });
 
-test("inline navigation selects games from pets and preserves a board through the one-line menu", async (t) => {
+test("inline navigation selects games from pets and preserves a board through the right menu", async (t) => {
   const h = host();
   t.after(h.dispose);
   h.config["panel.autoSize"] = false;
@@ -190,6 +197,10 @@ test("inline navigation selects games from pets and preserves a board through th
   assert.equal(p.state.mode, "tetris");
   const board = structuredClone(p.current());
   assert.equal(board.locks, 1);
+  p.handleInput("1\t");
+  assert.equal(p.state.mode, "menu");
+  p.handleInput("\t");
+  assert.equal(p.state.mode, "pets");
   p.handleInput("1\t2");
   assert.equal(p.state.mode, "tetris");
   assert.deepEqual(p.current(), board);
@@ -221,10 +232,13 @@ test("pet fire and walking freeze on hide; the sky stays sunset and pixel size r
   assert.equal(p.state.petFrame, frame + 1);
   p.handleInput("ws");
   assert.equal(p.state.weather, "sunset");
-  assert.equal(p.state.pixelSize, 2);
+  assert.equal(p.state.pixelSize, 1);
+  assert.equal(p.state.petCompact, true);
+  p.handleInput("s");
+  assert.equal(p.state.pixelSize, 1, "s is idempotent");
 });
 
-test("n selects dog and cow by name and persists cow plus a chosen chunky pixel size", async (t) => {
+test("n selects dog and cow; S keeps the original artwork and s returns to small pixels", async (t) => {
   const h = host();
   t.after(h.dispose);
   h.config["panel.autoSize"] = false;
@@ -232,14 +246,18 @@ test("n selects dog and cow by name and persists cow plus a chosen chunky pixel 
   const p = h.terminals[0].options.pty;
   p.handleInput("n");
   assert.equal(p.state.pet, "dog");
-  p.handleInput("ns");
+  p.handleInput("nS");
   assert.equal(p.state.pet, "cow");
-  assert.equal(p.state.pixelSize, 2);
+  assert.equal(p.state.pixelSize, 1);
+  assert.equal(p.state.petCompact, false);
   h.terminals[0].dispose();
   await h.commands["petsadhd.pets"]();
   const restored = h.terminals[1].options.pty;
   assert.equal(restored.state.pet, "cow");
-  assert.equal(restored.state.pixelSize, 2);
+  assert.equal(restored.state.pixelSize, 1);
+  assert.equal(restored.state.petCompact, false);
+  restored.handleInput("s");
+  assert.equal(restored.state.petCompact, true);
   assert.equal(restored.state.weather, "sunset");
 });
 
@@ -248,6 +266,7 @@ test("upgrade adopts small pixels and e starts an event that pauses and restores
     mode: "pets",
     pet: "cow",
     weather: "night",
+    appearanceVersion: 1,
     pixelSize: 2,
     games: {},
   });
@@ -256,6 +275,7 @@ test("upgrade adopts small pixels and e starts an event that pauses and restores
   await h.commands["petsadhd.pets"]();
   const p = h.terminals[0].options.pty;
   assert.equal(p.state.pixelSize, 1);
+  assert.equal(p.state.petCompact, true);
   assert.equal(p.state.weather, "sunset");
   p.handleInput("e");
   const event = structuredClone(p.state.spaceEvent);

@@ -3,6 +3,7 @@ const vscode = require("vscode");
 const { Music } = require("./audio");
 const { ArcadeTerminal } = require("./terminal");
 const { fitPanel } = require("./panel");
+const pets = require("./pet-scene");
 function activate(context) {
   let terminal,
     pty,
@@ -33,16 +34,15 @@ function activate(context) {
     (message) => vscode.window.showWarningMessage("PetsADHD: " + message),
   );
   function audio(state, paused) {
-    const mode =
-      state.mode === "pets"
-        ? "pets"
-        : ["tetris", "duel"].includes(state.mode)
-          ? "tetris"
-          : "invaders";
+    const mode = ["pets", "menu"].includes(state.mode)
+      ? "pets"
+      : ["tetris", "duel"].includes(state.mode)
+        ? "tetris"
+        : "invaders";
     const enabled =
       vscode.workspace.isTrusted &&
       state.musicOn &&
-      ["pets", "tetris", "duel", "invaders"].includes(state.mode);
+      ["pets", "menu", "tetris", "duel", "invaders"].includes(state.mode);
     const signature = JSON.stringify([mode, enabled, paused]);
     if (signature === lastAudio) return;
     lastAudio = signature;
@@ -120,7 +120,7 @@ function activate(context) {
       autoSize: setting().get("panel.autoSize", true),
       position: setting().get("panel.position", "bottom-right"),
       columns: compact ? 28 : setting().get("panel.columns", 72),
-      rows: compact ? 8 : setting().get("panel.rows", 28),
+      rows: compact ? pets.rows(pty.state) : setting().get("panel.rows", 28),
       shrink: compact,
     });
   }

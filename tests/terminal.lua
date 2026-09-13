@@ -49,7 +49,7 @@ assert(vim.api.nvim_win_get_config(win).relative == "", "native split")
 eventually(function()
   return state().petFrame and state().petFrame > 0
 end, "renderer starts animating")
-assert(vim.api.nvim_win_get_height(win) == 8, "eight terminal rows")
+assert(vim.api.nvim_win_get_height(win) == 4, "four terminal rows")
 assert(vim.api.nvim_win_get_position(win)[1] > vim.api.nvim_win_get_position(editor)[1], "bottom split")
 assert(state().pixelSize == 1 and state().weather == "sunset", "small pixels and sunset by default")
 eventually(function()
@@ -63,6 +63,23 @@ assert(
 local function input(keys)
   vim.api.nvim_chan_send(job, keys)
 end
+input("\t")
+eventually(function()
+  return state().mode == "menu"
+end, "Tab expands the right menu")
+assert(vim.api.nvim_win_get_height(win) == 4, "expanded right menu needs no extra row")
+input("\ts")
+eventually(function()
+  return state().mode == "pets" and state().petCompact
+end, "Tab collapses; s selects small")
+input("S")
+eventually(function()
+  return state().petCompact == false and vim.api.nvim_win_get_height(win) == 5
+end, "S opens original artwork")
+input("ss")
+eventually(function()
+  return state().petCompact and state().pixelSize == 1 and vim.api.nvim_win_get_height(win) == 4
+end, "repeated s restores four rows with fine pixels")
 input("nne")
 eventually(function()
   return state().pet == "cow" and state().spaceEvent ~= vim.NIL
@@ -135,7 +152,10 @@ eventually(function()
 end, "two-player mode works in terminal")
 input("1s")
 eventually(function()
-  return state().mode == "pets" and state().pixelSize == 2 and vim.api.nvim_win_get_height(win) == 8
+  return state().mode == "pets"
+    and state().pixelSize == 1
+    and state().petCompact
+    and vim.api.nvim_win_get_height(win) == 4
 end, "pets restore compact size")
 assert(state().games.tetris and state().games.duel, "mode switches keep both boards")
 -- Closing the split with ordinary editor commands also suspends the session.
@@ -152,7 +172,7 @@ vim.cmd("PetTerminal")
 win = vim.api.nvim_get_current_win()
 vim.o.lines = 28
 vim.cmd("doautocmd VimResized")
-assert(vim.api.nvim_win_get_height(win) == 8, "terminal remains small on editor resize")
+assert(vim.api.nvim_win_get_height(win) == 4, "terminal remains small on editor resize")
 terminal.close()
 eventually(function()
   return not vim.api.nvim_buf_is_valid(buf)
@@ -164,7 +184,7 @@ eventually(function()
   return vim.b[restored_buf].terminal_job_id ~= job and state().pet == "cow"
 end, "new process restores saved session")
 assert(
-  state().games.tetris and state().games.duel and state().pixelSize == 2,
+  state().games.tetris and state().games.duel and state().pixelSize == 1 and state().petCompact,
   "disk state preserves games and pixel preference"
 )
 -- An unexpectedly terminated child must not leave a dead pane or lose editor work.

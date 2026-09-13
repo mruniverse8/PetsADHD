@@ -8,7 +8,7 @@ bottom with right alignment by default; side docking is also available.
 
 ## Install and open
 
-1. Download **PetsADHD-0.3.11.vsix** from the repository's `dist` folder.
+1. Download **PetsADHD-0.3.12.vsix** from the repository's `dist` folder.
 2. Run **Extensions: Install from VSIX** and select the file. Reload VS Code if prompted.
 3. Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS). A terminal named **PetsADHD**
    opens at the **bottom with right alignment**, gains focus, expands for play, and starts Tetris.
@@ -47,28 +47,32 @@ editor area and extends toward the right edge; it is not a separate floating
 corner terminal. Docking affects the entire panel, including other terminals.
 See VS Code's [panel layout controls](https://code.visualstudio.com/docs/configure/custom-layout#_panel).
 
-**Pets are colored pixel art, at most five terminal lines tall.** Choose Rex,
+**Pets are colored pixel art in four terminal rows by default.** Choose Rex,
 **dog**, **cow**, duck, or readable 67 with **n**. The dog and cow have a blocky,
 Minecraft-inspired look with original details: a teal dog collar and a distinct
 cow coat pattern with a pink muzzle. Their menu names are simply **dog** and **cow**.
 
-**s** changes the pixel size: **1× small/fine pixels** by default, or **2× chunky blocks**.
-Each size uses a matching sprite design so the pets still fit within five lines.
-The choice is remembered in this workspace. Set `petsadhd.pets.pixelSize` in VS Code
-settings to change the preferred size. Pets never enlarge automatically when the
-terminal is resized. This update adopts the small default for older saved
-appearances; an explicit pixel-size setting still takes priority. Subsequent
-changes with **s** are remembered.
+**s** always selects the four-row small layout with **1× fine pixels** and
+collapses the menu. Pressing it again keeps that size. **S** shows the original
+five-row artwork with the same fine pixels. Compact poses retain the original
+palette and the pets' defining details, with no blur or automatic resampling.
+Both versions remain available, and the choice is saved for this workspace.
+Older saved appearances adopt the small default. The optional
+`petsadhd.pets.pixelSize: 2` setting still enables the older chunky sprites.
 
-Pets have a thin baseline and **one menu line**, with no separate title, status,
-or extra control rows. The arcade chooser also uses a single line:
+The menu is **collapsed on the right**, with no baseline, title or separate menu
+row. Press **Tab** to expand or collapse it on the right. In a wide terminal,
+the expanded menu shows the pet/event and controls beside the artwork:
 
 ```text
-1234 | a fire n pet s pixels e event m hide ? | 1x Sunset
+dog / Sunset
+1Pet 2Tet 3Duel 4Inv
+a fire n pet e event ? help
+s/S size M music m hide Tab
 ```
 
 Press **1–4** to switch directly between modes without losing game progress.
-**a** breathes fire, **n** changes the pet, **s** changes pixel size, and **e**
+**a** breathes fire, **n** changes the pet, **s** selects small, and **e**
 summons a random space event. Labels shorten in narrow panels; **?** shows full
 controls. The menu names the active event.
 
@@ -88,11 +92,13 @@ movement, fire and space events while hidden; reopening resumes them.
 
 ![Small dog with a detailed sunset](media/pets-preview.png)
 
+![Expanded right menu beside four-row pets](media/pets-menu-preview.png)
+
 ![Black hole above the sunset](media/blackhole-preview.png)
 
 ![Supernova expanding over the mountains](media/supernova-preview.png)
 
-Opening pets adjusts the bottom panel toward **8 rows**, subject to VS Code's
+Opening pets adjusts the bottom panel toward **4 rows**, subject to VS Code's
 minimum size and resize increments. Opening a game expands it toward **28 rows**.
 Left/right panels use a width target of **28 columns** for pets and **72 columns**
 for games. Switching modes through the menu also adjusts the size while preserving
@@ -126,7 +132,8 @@ the game and audio suspend until the panel is enlarged.
 
 | Mode | Minimum terminal size (columns × rows) |
 | --- | --- |
-| Pixel pets and one-line menu | 24 × 7 |
+| Small pixel pets and right menu | 28 × 4 |
+| Original pet artwork (`S`) | 28 × 5 |
 | Solo Tetris | 28 × 16 |
 | Competitive Tetris, side by side | 56 × 16 |
 | Competitive Tetris, stacked | 28 × 28 |
@@ -143,7 +150,7 @@ Click inside the PetsADHD terminal before playing. Press **?** for control help.
 | Competitive P1 | **a/d** move, **s** soft drop, **w/g** rotate, **f** hard drop |
 | Competitive P2 | **arrows** move/rotate/soft drop, **/** reverse rotate, **Enter** hard drop |
 | Invaders | **Left/Right** or **h/l** move; **a** fires |
-| Pets | **a** breathes fire; **n** cycles Rex, dog, cow, duck, 67; **s** changes pixel size; **e** summons a space event |
+| Pets | **a** fire; **n** next pet; **s** small; **S** original artwork; **e** space event; **Tab** expand/collapse right menu |
 
 Two players share one keyboard, using lowercase letters for Player 1. Both get
 identical pieces and speed. Clearing 2 / 3 / 4 rows sends 1 / 2 / 4 garbage rows

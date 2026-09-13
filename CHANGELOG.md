@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.12
+
+- Default to four-row pets with crisp fine pixels and a collapsed menu on the right; Tab expands or collapses it beside the scene.
+- Make `s` always select small and `S` restore the original taller artwork, preserving the palette and sprite details.
+- Adapt the detailed sunset to the shorter scene, retaining fire, space events, music and saved game progress.
+- Fit both editor terminals to the selected pet height and migrate old appearances to small pixels.
+
 ## 0.3.11
 
 - Replace the default soundtrack for pets and every game in both editors with the newly requested track.

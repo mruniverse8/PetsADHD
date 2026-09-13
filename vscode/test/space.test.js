@@ -21,7 +21,7 @@ test("seeded space events vary over time but remain stable between renders and h
     Array.from({ length: 500 }, (_, f) => eventAt({ spaceSeed: 8453 }, f)),
   );
 });
-test("every event renders visibly inside the existing five-line sky without affecting pet size", () => {
+test("every event renders visibly inside the four-row sky without affecting pet size", () => {
   const state = { pet: "dog", pixelSize: 1, spaceSeed: 1 };
   for (const type of types) {
     const withEvent = scene(
@@ -33,7 +33,7 @@ test("every event renders visibly inside the existing five-line sky without affe
     assert.equal(withEvent.event.type, type);
     assert.notDeepEqual(withEvent.grid, without.grid);
     assert.deepEqual(withEvent.actor, without.actor);
-    assert.equal(withEvent.grid.length, 10);
+    assert.equal(withEvent.grid.length, 8);
     assert.ok(withEvent.grid.every((row) => row.length === 78));
   }
   const hole = scene(

@@ -1,5 +1,59 @@
 "use strict";
 module.exports = {
+  // Hand-adjusted eight-row poses for four terminal rows. Keep the original
+  // palette and feature pixels; never blur or resample the taller artwork.
+  small: {
+    trex: [
+      "        gggggg",
+      "       ggkwggs",
+      "       gggswww",
+      "      gggllgg ",
+      "g    ggggll g ",
+      "gggggggggll  ",
+      "  ssggggll   ",
+      "    cc  cc   ",
+    ],
+    dog: [
+      "          H  H  ",
+      "          W  W  ",
+      "         WWKWWW ",
+      "  H     GWWWWKK ",
+      "  GGWWWWGTTWWW  ",
+      "  WWWWWWGWWWW   ",
+      "   GWWWWWWWW    ",
+      "   HH HH  HH HH ",
+    ],
+    cow: [
+      "          h   h  ",
+      "         DDWDDW  ",
+      "         DWKWWK  ",
+      "  D DWWDDDWWWWW  ",
+      "  DDWWDDDWPPPPP  ",
+      "   DWWWDWWPkPkP  ",
+      "   WWDDWWWDDW    ",
+      "   KK KK  KK KK  ",
+    ],
+    duck: [
+      "    yyyy    ",
+      "   ykwyyy   ",
+      "   yyyyoooo ",
+      " yyyyyyyy   ",
+      "yyyycccyyy  ",
+      " yyyccyyy   ",
+      "  yyyyyy    ",
+      "   oo oo    ",
+    ],
+    sixseven: [
+      " rrrr  yyyyy ",
+      "rr  rr     yy",
+      "rr         yy",
+      "rrrrr     yy ",
+      "rr  rr    yy ",
+      "rr  rr   yy  ",
+      "rr  rr   yy  ",
+      " rrrr    yy  ",
+    ],
+  },
   // Ten pixel rows become five terminal lines using foreground/background halves.
   art: {
     trex: [

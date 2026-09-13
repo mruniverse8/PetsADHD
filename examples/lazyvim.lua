@@ -7,7 +7,7 @@ return {
     lazy = false,
     dependencies = { "folke/snacks.nvim" },
     opts = {
-      terminal = { height = 8, pixel_size = 1 },
+      terminal = { height = 4, pixel_size = 1 },
     },
   },
 }

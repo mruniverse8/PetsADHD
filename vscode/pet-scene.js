@@ -5,35 +5,41 @@ const space = require("./space-events");
 function pixelSize(value) {
   return value === 2 ? 2 : 1;
 }
-function sprite(pet, size) {
-  const art = size === 2 ? sprites.chunky : sprites.art;
+function compact(state) {
+  return state.petCompact !== false && pixelSize(state.pixelSize) === 1;
+}
+function rows(state) {
+  return compact(state) ? 4 : 5;
+}
+function sprite(pet, size, small) {
+  const art = size === 2 ? sprites.chunky : small ? sprites.small : sprites.art;
   return art[pet] || art.trex;
 }
-function pose(pet, columns, frame, pixels = 1) {
+function pose(pet, columns, frame, pixels = 1, small = true) {
   const scale = pixelSize(pixels),
-    source = sprite(pet, scale);
+    source = sprite(pet, scale, small);
   const width = Math.max(...source.map((row) => row.length)) * scale;
-  const span = Math.max(1, columns - 2 - width);
-  const phase = (Math.floor(frame / 2) + span) % (span * 2);
+  const span = Math.max(0, columns - 2 - width);
+  const phase = span ? (Math.floor(frame / 2) + span) % (span * 2) : 0;
   return {
     width,
     x: Math.min(phase, span * 2 - phase),
-    direction: phase < span ? 1 : -1,
+    direction: !span || phase < span ? 1 : -1,
     scale,
   };
 }
 function scene(state, columns, frame) {
   const pet = sprites.art[state.pet] ? state.pet : "trex";
   const width = columns - 2,
-    height = 10;
-  const grid = sunset(width, frame);
+    height = rows(state) * 2;
+  const grid = sunset(width, frame, height);
   const event = space.eventAt(state, frame);
   space.draw(grid, event, frame);
   const put = (x, y, color) => {
     if (x >= 0 && x < width && y >= 0 && y < height) grid[y][x] = color;
   };
-  const actor = pose(pet, columns, frame, state.pixelSize);
-  let art = sprite(pet, actor.scale).map((row) =>
+  const actor = pose(pet, columns, frame, state.pixelSize, compact(state));
+  let art = sprite(pet, actor.scale, compact(state)).map((row) =>
     row.padEnd(actor.width / actor.scale, " ").split(""),
   );
   // Alternate the feet inside the existing sprite bounds. Numbers stay upright.
@@ -74,27 +80,21 @@ function scene(state, columns, frame) {
   return { grid, weather: "sunset", event, actor, height };
 }
 function menu(state, columns, frame = state.petFrame || 0) {
-  const size = pixelSize(state.pixelSize),
-    event = space.eventAt(state, frame);
-  const label = event ? space.labels[event.type] : "Sunset";
-  const short = event
-    ? {
-        blackhole: "HOLE",
-        supernova: "NOVA",
-        comet: "COMET",
-        aurora: "AURORA",
-        saturn: "SATURN",
-      }[event.type]
-    : "SUNSET";
-  const fire = state.petFire > 0 ? "FIRE!" : "a fire";
-  const variants = [
-    `1 Pets 2 Tetris 3 Duel 4 Inv | ${fire} n pet s pixels e event m hide M music ? | ${state.pet} ${size}x | ${event ? `Sunset / ${label}` : "Sunset"}`,
-    `1234 | ${fire} n pet s pixels e event m hide M music ? | ${size}x ${label}`,
-    `1234 a n s${size} e mM? ${short}`,
-  ];
-  return (
-    variants.find((value) => value.length <= columns) ||
-    variants.at(-1).slice(0, columns)
-  );
+  if (state.mode !== "menu")
+    return { width: 4, lines: ["Tab", " ?", " s", " m"] };
+  const width = columns >= 52 ? 28 : 7;
+  const event = space.eventAt(state, frame);
+  return {
+    width,
+    lines:
+      width === 7
+        ? ["1 Pets", "2 Tet", "3 Duel", "4 Inv"]
+        : [
+            `${state.pet || "trex"} / ${event ? space.labels[event.type] : "Sunset"}`,
+            "1Pet 2Tet 3Duel 4Inv",
+            "a fire n pet e event ? help",
+            "s/S size M music m hide Tab",
+          ],
+  };
 }
-module.exports = { scene, pose, pixelSize, menu };
+module.exports = { scene, pose, pixelSize, compact, rows, menu };

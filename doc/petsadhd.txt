@@ -33,13 +33,14 @@ CONTROLS                                                 *petsadhd-controls*
     sidebar remains available through :PetToggle.
 
 BOTTOM TERMINAL                                          *petsadhd-terminal*
-    Eight terminal rows, with five-line pets and a single menu line. Small
-    pixels, detailed sunset, clouds, mountains, water and occasional space
+    Four terminal rows, with a collapsed right menu. Fine 1x pixels, detailed
+    sunset, clouds, mountains, water and occasional space
     events. Pets keep animating while editing; games pause off-focus.
-    n: next pet (Rex, dog, cow, duck, 67). s: small/chunky pixels.
+    n: next pet (Rex, dog, cow, duck, 67). s: four-row small layout, fine pixels.
+    S: original five-row artwork. Both retain the same palette and sharp pixels.
     a: breathe fire. e: summon a black hole, supernova, comet, aurora or Saturn.
     1-4: pets/Tetris/duel/Invaders. Games expand the pane; pets shrink it again.
-    m: hide and preserve. Tab: one-line menu. ?: help. M: toggle music.
+    m: hide and preserve. Tab: expand/collapse right menu. ?: help. M: music.
     q: discard the current game and return to the menu.
     CTRL-\ CTRL-N: Neovim normal mode, then use normal window navigation.
     Closing the split preserves the session. Reopen with :PetTerminal.
@@ -64,7 +65,7 @@ OPTIONS                                                   *petsadhd-options*
     pets = {}           enabled, kind, size, weather, state_file.
     music = false       Start muted (M can enable music).
     tetris = {}         speed: initial speed multiplier, 1-8.
-    terminal = {}       height (8), game_height (18), pixel_size (1), pet,
+    terminal = {}       height (4), game_height (18), pixel_size (1), pet,
                         node (executable path), state_file (optional override).
     music = {}          enabled, url, volume (0-100), extractor, player.
 

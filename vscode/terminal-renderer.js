@@ -61,9 +61,7 @@ function render(state, dimensions, frame = 0, suspended = false) {
     text(0, rows - 1, "Tab menu  ? controls  q quit", BORDER);
   }
   let playable = true;
-  if (mode === "menu") {
-    // The shared navigation bar below is the entire menu.
-  } else if (mode === "tetris" || mode === "duel") {
+  if (mode === "tetris" || mode === "duel") {
     const dual = mode === "duel",
       wide = rows >= 26 && cols >= (dual ? 84 : 42);
     const scale = wide ? 2 : 1,
@@ -157,14 +155,28 @@ function render(state, dimensions, frame = 0, suspended = false) {
         );
       else pixels(grid, x + 1, 3);
     } else text(0, 3, "Resize: 68 columns x 18 rows minimum");
-  } else if (mode === "pets") {
-    playable = cols >= 24 && rows >= 7;
+  } else if (compactUI) {
+    const height = pets.rows(state);
+    const menu = pets.menu(state, cols, state.petFrame ?? frame);
+    const sceneColumns = cols - menu.width;
+    const actor = pets.pose(
+      state.pet || "trex",
+      sceneColumns,
+      0,
+      state.pixelSize,
+      pets.compact(state),
+    );
+    const neededColumns = Math.max(28, actor.width + menu.width + 2);
+    playable = cols >= neededColumns && rows >= height;
     if (playable) {
-      const scene = pets.scene(state, cols, state.petFrame ?? frame);
-      const floor = rows - 2;
-      pixels(scene.grid, 1, floor - 5);
-      text(1, floor, "─".repeat(cols - 2), "#b58a89");
-    } else text(0, 0, "Resize: 24 cols x 7 rows");
+      const scene = pets.scene(state, sceneColumns, state.petFrame ?? frame);
+      pixels(scene.grid, 1, rows - height);
+      for (let y = 0; y < height; y++)
+        put(sceneColumns, rows - height + y, "│", "#967786");
+      menu.lines.forEach((line, y) =>
+        text(sceneColumns + 1, rows - height + y, line, "#8bd5ef"),
+      );
+    } else text(0, 0, `Resize: ${neededColumns} cols x ${height} rows`);
   }
   const status = !playable
     ? "PAUSED / enlarge the panel"
@@ -184,17 +196,6 @@ function render(state, dimensions, frame = 0, suspended = false) {
               ? `${state.pet} / ${state.weather}`
               : "";
   if (!compactUI) text(0, 1, status, "#eed49f");
-  else {
-    const choices =
-      mode === "pets"
-        ? pets.menu(state, cols, state.petFrame ?? frame)
-        : cols >= 64
-          ? "1 Pets 2 Tetris 3 Duel 4 Invaders | m hide ? help"
-          : cols >= 40
-            ? "1 Pets 2 Tetris 3 Duel 4 Inv | m hide ?"
-            : "1Pet 2Tet 3D 4Inv m?";
-    text(0, rows - 1, choices, "#8bd5ef");
-  }
   const lines = screen.map((row) => {
     let fg,
       bg,

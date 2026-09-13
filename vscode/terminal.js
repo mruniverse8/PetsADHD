@@ -5,7 +5,7 @@ const space = require("./space-events");
 const modes = ["menu", "pets", "tetris", "duel", "invaders"];
 const help = {
   menu: "Choose 1 Pets, 2 Tetris, 3 Competitive Tetris, or 4 Invaders. m hides the terminal and preserves your session.",
-  pets: "a: breathe fire. n: next pet (Rex, dog, cow, duck, 67). s: toggle fine/chunky pixels. e: summon a random space event. Sunset: clouds, mountains, reflections, occasional black holes, supernovas, comets, auroras and Saturn. Pets walk across the terminal at a fixed size. m: hide. Tab: menu.",
+  pets: "a: breathe fire. n: next pet (Rex, dog, cow, duck, 67). s: four-row small pets with fine pixels. S: original five-row artwork. e: summon a random space event. Sunset: clouds, mountains, reflections, occasional black holes, supernovas, comets, auroras and Saturn. m: hide. Tab: expand/collapse the right menu.",
   tetris:
     "Arrows or h/j/k/l: move, soft drop, rotate. z: reverse rotate. Space: hard drop. + / -: speed 1–8.",
   duel: "Shared keyboard. P1: a/d move, s down, w/g rotate, f hard drop. P2: arrows, / reverse rotate, Enter hard drop. + / - changes both speeds.",
@@ -27,11 +27,13 @@ class ArcadeTerminal {
         ? saved.pet
         : options.pet || "trex",
       weather: "sunset",
-      appearanceVersion: 1,
+      appearanceVersion: 2,
+      petCompact:
+        saved.appearanceVersion === 2 ? saved.petCompact !== false : true,
       spaceSeed: saved.spaceSeed || Math.floor(Math.random() * 0x7fffffff) + 1,
       spaceEvent: saved.spaceEvent || null,
       pixelSize:
-        saved.appearanceVersion === 1 &&
+        saved.appearanceVersion === 2 &&
         (saved.pixelSize === 1 || saved.pixelSize === 2)
           ? saved.pixelSize
           : options.pixelSize === 2
@@ -151,7 +153,7 @@ class ArcadeTerminal {
     )
       return;
     this.frame++;
-    if (this.state.mode === "pets") {
+    if (["pets", "menu"].includes(this.state.mode)) {
       this.state.petFrame++;
       this.state.petFire = Math.max(0, this.state.petFire - 1);
     }
@@ -210,14 +212,14 @@ class ArcadeTerminal {
         help[this.state.mode] +
           " 1: pets, 2: Tetris, 3: two-player Tetris, 4: Invaders. All games: p pause, r restart, m hide/resume, M music, Tab menu, q discard current game.",
       );
-    if (key === "\t") return this.select("menu");
+    if (key === "\t")
+      return this.select(this.state.mode === "menu" ? "pets" : "menu");
     if (key === "q" || key === "\x03") {
       delete this.state.games[this.state.mode];
       return this.select("menu");
     }
-    if (this.state.mode === "menu") return;
     if (key === "M") this.state.musicOn = !this.state.musicOn;
-    else if (this.state.mode === "pets") {
+    else if (["pets", "menu"].includes(this.state.mode)) {
       if (key === "a" && this.playable) this.state.petFire = 10;
       if (key === "e" && this.playable) space.summon(this.state);
       if (key === "n") {
@@ -225,8 +227,11 @@ class ArcadeTerminal {
         this.state.pet = pets[(pets.indexOf(this.state.pet) + 1) % pets.length];
         this.state.petFire = 0;
       }
-      if (key === "s")
-        this.state.pixelSize = this.state.pixelSize === 1 ? 2 : 1;
+      if (key === "s" || key === "S") {
+        this.state.pixelSize = 1;
+        this.state.petCompact = key === "s";
+        return this.select("pets");
+      }
     } else if (key === "r") {
       const speed =
         this.state.mode === "duel"

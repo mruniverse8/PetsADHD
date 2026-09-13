@@ -5,24 +5,25 @@ sidebar companions, Astra Tetris, shared-keyboard competitive Tetris, and Space
 Invaders with optional music.
 
 **LazyVim:** run **`:PetTerminal`** or press **Space → u → Shift+P** to open
-or resume a real terminal in a small **eight-row bottom split**. It includes the
-same five-line pixel pets, dog and cow, detailed sunset, fire and random space
+or resume a real terminal in a small **four-row bottom split**. It includes
+compact pixel pets, dog and cow, detailed sunset, fire and random space
 events as VS Code. Small pixels are the default. Press **m** to minimize without
 losing progress. Pets keep moving while you edit; games pause when you leave the
 pane. **1–4** selects pets, Tetris, two-player Tetris or Invaders. Games expand the
 pane, and returning to pets restores its small height. Requires **Node.js 18+**
 on PATH; no npm install is needed.
 
-**VS Code:** [download the VSIX](dist/PetsADHD-0.3.11.vsix), then run **Extensions:
+**VS Code:** [download the VSIX](dist/PetsADHD-0.3.12.vsix), then run **Extensions:
 Install from VSIX**. Games run as pixel graphics in the integrated Terminal panel.
 Use **PetsADHD: Move Game Panel** to choose Bottom Right, Bottom, Left, or Right.
 Press **Ctrl+Alt+G** (**Cmd+Option+G** on macOS) to open or resume a game
 in a **bottom panel aligned right**, automatically expanded for play.
 First use starts Tetris. **Ctrl+Alt+P** (**Cmd+Option+P**) opens miniature pixel-art pets
-at the bottom right, with a panel targeting eight rows. Pets use at most five
-terminal lines, with a single menu row; they never grow with the panel.
-In VS Code, **n** selects pets including the blocky **dog** and **cow**, **s** changes
-pixel size, **a** breathes fire, and **e** summons a random space event. Small pixels
+at the bottom right, with a panel targeting four rows. The menu is collapsed
+on the right; **Tab** expands or collapses it without consuming a separate row.
+In both terminal versions, **n** selects pets including the blocky **dog** and **cow**,
+**s** selects small pets, **S** shows the original taller artwork,
+**a** breathes fire, and **e** summons a random space event. Small pixels
 are the default. Pets walk in a detailed sunset with clouds, mountains and water
 reflections; black holes, supernovas, comets, auroras and Saturn appear occasionally.
 Press **m** to hide and preserve the session; use its shortcut to reopen.
@@ -99,9 +100,12 @@ Default shortcuts: `<leader>uP` opens/minimizes the bottom terminal, `<leader>uA
 `<leader>uI` opens Invaders. Game controls are local to their scratch buffers.
 The sidebar habitat remains available through `:PetToggle`.
 
-In the bottom terminal, **n** cycles Rex, dog, cow, duck and 67; **s** toggles
-small/chunky pixels; **a** breathes fire; **e** summons a black hole, supernova,
-comet, aurora or Saturn. **Tab** opens the one-line menu; **?** shows controls.
+In the bottom terminal, **n** cycles Rex, dog, cow, duck and 67; **s** selects the
+four-row small layout with fine 1× pixels and collapses the menu; **S** restores
+the original five-row artwork. The compact poses keep the palette, eyes, collar,
+horns and muzzle details without blur or resampling. **a** breathes fire; **e**
+summons a black hole, supernova, comet, aurora or Saturn. **Tab** expands/collapses
+the menu on the right; **?** shows controls.
 Press **Ctrl+\\, Ctrl+N** to return to Neovim normal mode and move between splits.
 **m** hides the terminal; reopen it with its command or shortcut. Closing the
 split with `:close` also preserves it. Boards, pet preferences and animation
@@ -152,9 +156,9 @@ opts = {
   },
   tetris = { speed = 1 }, -- initial speed, 1–8
   terminal = {
-    height = 8,       -- bottom pet pane, minimum 7 rows
+    height = 4,       -- bottom pet pane, minimum 4 rows
     game_height = 18, -- expand when selecting a game
-    pixel_size = 1,   -- small default; s changes the saved preference
+    pixel_size = 1,   -- fine pixels; s always restores small
     -- node = "/path/to/node", -- if Node.js is not on PATH
     -- pet = "dog",           -- first-run pet; also cow, trex, duck, sixseven
     -- state_file = "/path/to/terminal-session.json",

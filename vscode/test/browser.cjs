@@ -87,7 +87,7 @@ const host = require("./host.cjs");
       ["duel", 28, 28],
       ["tetris", 42, 26],
       ["invaders", 68, 18],
-      ["pets", 80, 8],
+      ["pets", 80, 4],
     ]) {
       pty.select(mode);
       t.output = "";
@@ -114,7 +114,7 @@ const host = require("./host.cjs");
     assert.equal(pty.state.mode, "menu");
     await page
       .locator("#terminal")
-      .screenshot({ path: "/tmp/petsadhd-menu-terminal.png" });
+      .screenshot({ path: path.resolve("media/pets-menu-preview.png") });
     await page.keyboard.press("1");
     await page.evaluate(() => window.inputDone);
     assert.equal(pty.state.mode, "pets");
@@ -132,11 +132,52 @@ const host = require("./host.cjs");
     await page
       .locator("#terminal")
       .screenshot({ path: path.resolve("media/cow-preview.png") });
+    await page.keyboard.press("S");
+    await page.evaluate(() => window.inputDone);
+    assert.equal(pty.state.petCompact, false);
+    t.output = "";
+    pty.setDimensions({ columns: 80, rows: 5 });
+    await page.evaluate((output) => {
+      term.resize(80, 5);
+      return new Promise((resolve) => term.write(output, resolve));
+    }, t.output);
+    assert.ok(pty.playable);
+    await page
+      .locator("#terminal")
+      .screenshot({ path: path.resolve("media/pets-full-preview.png") });
+    await page.keyboard.press("s");
+    await page.evaluate(() => window.inputDone);
+    t.output = "";
+    pty.setDimensions({ columns: 80, rows: 4 });
+    await page.evaluate((output) => {
+      term.resize(80, 4);
+      return new Promise((resolve) => term.write(output, resolve));
+    }, t.output);
+    // Four rows also fit the narrow 28-column side panel with the menu open.
+    pty.select("menu");
+    t.output = "";
+    pty.setDimensions({ columns: 28, rows: 4 });
+    assert.ok(pty.playable);
+    await page.evaluate((output) => {
+      term.resize(28, 4);
+      return new Promise((resolve) => term.write(output, resolve));
+    }, t.output);
+    await page
+      .locator("#terminal")
+      .screenshot({ path: "/tmp/petsadhd-narrow-menu.png" });
+    pty.select("pets");
+    t.output = "";
+    pty.setDimensions({ columns: 80, rows: 4 });
+    await page.evaluate((output) => {
+      term.resize(80, 4);
+      return new Promise((resolve) => term.write(output, resolve));
+    }, t.output);
     for (const key of ["s", "a", "e"]) {
       await page.keyboard.press(key);
       await page.evaluate(() => window.inputDone);
     }
-    assert.equal(pty.state.pixelSize, 2);
+    assert.equal(pty.state.pixelSize, 1);
+    assert.equal(pty.state.petCompact, true);
     assert.equal(pty.state.petFire, 10);
     assert.ok(pty.state.spaceEvent);
     assert.equal(pty.state.weather, "sunset");
