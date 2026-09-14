@@ -10,6 +10,9 @@ local size_heights = { small = 7, big = 12 }
 local footer_height = 12
 local cell_pixels = false
 local function height(size)
+  if cell_pixels and size == "small" then
+    return 7
+  end
   return size_heights[size] * (cell_pixels and 2 or 1) - (cell_pixels and 2 or 0)
 end
 local weather_mode = "auto"
@@ -157,7 +160,18 @@ function M.render(width, frame)
     " rrr    y    ",
   }
   local pixels = ({ dog = dog, trex = trex, duck = duck, sixseven = sixseven })[companion]
-  if companion == "sixseven" and size_mode == "big" then
+  if cell_pixels and size_mode == "small" then
+    pixels = ({
+      trex = { "    gggg", "    gkww", "gggggllg", "  cc cc " },
+      dog = { "      dd ", "     dbkk", "bbbbbbcc ", " cc  cc  " },
+      duck = { "  ykyoo", "yyyyyy ", " yyccyy", "  o o  " },
+      sixseven = { " rr yyy", "r     y", "rrr  y ", "r r y  ", "rrr y  " },
+    })[companion]
+    if companion ~= "sixseven" and math.floor(t / 4) % 2 == 1 then
+      local feet = pixels[#pixels]
+      pixels[#pixels] = feet:sub(2) .. feet:sub(1, 1)
+    end
+  elseif companion == "sixseven" and size_mode == "big" then
     pixels = {}
     for _, line in ipairs(sixseven) do
       local enlarged = line:gsub(".", function(pixel)
@@ -174,6 +188,8 @@ function M.render(width, frame)
     return {}, {}
   end
   local weather = weather_mode == "auto" and (t % 180 < 110 and "sun" or "rain") or weather_mode
+  local tiny = cell_pixels and size_mode == "small"
+  local sky_height = tiny and (companion == "sixseven" and 1 or 2) or 3
   local canvas = {}
   for row = 1, canvas_height do
     canvas[row] = {}
@@ -199,13 +215,20 @@ function M.render(width, frame)
   end
   if weather == "sun" then
     local rays = t % 8 < 4
-    paint({ rays and "  o  " or "o   o", " yyy ", "oyyyo", " yyy ", rays and "  o  " or "o   o" }, width - 7, 0)
-    paint({ "  ww  ", " wwwww" }, 2 + math.floor(t / 12) % math.max(1, width - 15), 1)
+    if tiny then
+      paint(sky_height == 1 and { "oyo" } or { " y ", "oyo" }, width - 4, 0)
+      paint({ " www " }, 1 + math.floor(t / 12) % math.max(1, width - 10), 0)
+    else
+      paint({ rays and "  o  " or "o   o", " yyy ", "oyyyo", " yyy ", rays and "  o  " or "o   o" }, width - 7, 0)
+      paint({ "  ww  ", " wwwww" }, 2 + math.floor(t / 12) % math.max(1, width - 15), 1)
+    end
   else
-    paint({ "  hhhhh  ", " hhhhhhh ", "hhhhhhhhh" }, 1 + math.floor(t / 10) % math.max(1, width - 11), 0)
+    local cloud = tiny and (sky_height == 1 and { "hhhh" } or { " hh ", "hhhh" })
+      or { "  hhhhh  ", " hhhhhhh ", "hhhhhhhhh" }
+    paint(cloud, 1 + math.floor(t / 10) % math.max(1, width - (tiny and 6 or 11)), 0)
     for drop = 1, math.floor(width / 3) do
       local x = (drop * 7 + math.floor(t / 4)) % width
-      local y = 3 + (drop * 5 + t * 2) % (canvas_height - 4)
+      local y = sky_height + (drop * 5 + t * 2) % (canvas_height - sky_height - 1)
       put(x, y, "r")
       put(x, y + 1, "r")
     end
@@ -223,11 +246,13 @@ function M.render(width, frame)
     return phase <= distance and phase or (distance * 2 - phase), phase > distance
   end
   local x, mirror = bounce(math.floor(t / 2), width - sprite_width - 2)
-  local y = bounce(math.floor(t / 3), canvas_height - #pixels - 4)
-  x, y = x + 1, y + 3
+  local y = bounce(math.floor(t / 3), canvas_height - #pixels - sky_height - 1)
+  x, y = x + 1, y + sky_height
   if companion == "sixseven" then
     -- Keep the counters and gap empty even when rain passes behind the digits.
-    y = y - y % 2
+    if not cell_pixels then
+      y = y - y % 2
+    end
     for row = y, y + #pixels + 1 do
       for col = x, x + sprite_width + 1 do
         if canvas[row] and canvas[row][col] then

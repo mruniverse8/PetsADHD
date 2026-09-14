@@ -1,5 +1,13 @@
 "use strict";
 module.exports = {
+  // Hand-drawn poses for solid cells: no vertical squashing or glyph halves.
+  tiny: {
+    trex: ["    gggg", "    gkww", "gggggllg", "  cc cc "],
+    dog: ["     H H ", "    WWKWK", "GGWWWGTWW", " HH  HH  "],
+    cow: ["    h h ", "   DWKWK", "DDWDWPPP", " KK  KK "],
+    duck: ["  ykyoo", "yyyyyy ", " yyccyy", "  o o  "],
+    sixseven: [" rr yyy", "r     y", "rrr  y ", "r r y  ", "rrr y  "],
+  },
   // Hand-adjusted eight-row poses for four terminal rows. Keep the original
   // palette and feature pixels; never blur or resample the taller artwork.
   small: {

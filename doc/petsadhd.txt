@@ -60,8 +60,9 @@ THEMES                                                     *petsadhd-themes*
 
     Apple Terminal uses solid background cells for pets to avoid gaps and
     uneven block-glyph heights. Each pixel uses two columns and one row.
-    The bottom pet pane needs 8 rows (10 for original art). Sidebar pets need
-    more space; select small pets in narrow explorers. Games keep their layout.
+    Tiny animals fit 4 rows; 67 uses 5 to keep the digits readable. S restores
+    original art in 10 rows. Small sidebar pets and weather fit 7 rows.
+    Select small pets in narrow explorers. Games keep their layout.
     pets.pixel_rendering and terminal.pixel_rendering accept auto (default),
     half (compact block glyphs), or cells (solid background cells).
 

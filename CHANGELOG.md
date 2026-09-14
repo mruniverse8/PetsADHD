@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Avoid Apple Terminal block-glyph gaps with solid-cell pet rendering and hand-drawn four-row tiny animals (five rows for readable 67 digits); small sidebar pets and weather fit seven rows.
+
 - Follow light and dark editor themes in Neovim plugin surfaces and terminal UI; VS Code follows the active theme kind.
 - Adjust text, borders, sidebar weather and game colors for contrast while preserving the terminal's sunset and pet artwork.
 - Refresh open and minimized terminal sessions on theme changes without restarting games or changing global ANSI palettes.

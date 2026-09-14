@@ -110,8 +110,9 @@ pet artwork retain their original colors and details.
 
 Apple Terminal uses solid background cells for pet artwork because its block
 glyphs can leave gaps and uneven pixel heights. Each pixel occupies two columns
-and one row; the bottom pet pane expands to eight rows (ten for original art).
-Sidebar pets also need more space; use `pets.size = "small"` in a narrow explorer.
+and one row. Hand-drawn tiny animals fit four rows; 67 uses five so the digits
+stay readable. `S` restores the detailed ten-row artwork. The sidebar's small
+mode fits seven rows including weather; use `pets.size = "small"` in an explorer.
 Set `pixel_rendering = "half"` under `pets` or `terminal` to use compact block
 glyphs, or `"cells"` to force solid cells in another terminal. The default is
 `"auto"`. Games keep their existing layout.

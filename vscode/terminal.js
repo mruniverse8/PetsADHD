@@ -249,6 +249,7 @@ class ArcadeTerminal {
         const pets = ["trex", "dog", "cow", "duck", "sixseven"];
         this.state.pet = pets[(pets.indexOf(this.state.pet) + 1) % pets.length];
         this.state.petFire = 0;
+        if (this.state.petCells) return this.select(this.state.mode);
       }
       if (key === "s" || key === "S") {
         this.state.pixelSize = 1;

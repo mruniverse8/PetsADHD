@@ -62,6 +62,48 @@ test("the arcade chooser expands on the right while keeping pets visible at narr
 });
 
 const { scene, pose, pixelSize, menu } = require("../pet-scene");
+test("tiny solid-cell pets fit narrow four-row panels with fire, events and right menus", () => {
+  for (const pet of Object.keys(sprites.tiny)) {
+    const height = pet === "sixseven" ? 5 : 4;
+    assert.equal(sprites.tiny[pet].length, height);
+    for (const mode of ["pets", "menu"])
+      for (const columns of [28, 52, 110])
+        for (const type of [
+          "blackhole",
+          "supernova",
+          "comet",
+          "aurora",
+          "saturn",
+        ])
+          for (const frame of [0, 20, 60]) {
+            const state = {
+              mode,
+              games: {},
+              pet,
+              petCells: true,
+              petFire: 5,
+              petFrame: frame,
+              spaceEvent: { type, start: 0, seed: 1 },
+            };
+            const output = render(state, { columns, rows: height });
+            assert.ok(
+              output.playable,
+              `${pet}/${mode} fits ${columns}x${height}`,
+            );
+            assert.equal(output.lines.length, height);
+            assert.ok(
+              output.lines.every((line) => plain(line).length === columns),
+            );
+          }
+  }
+  assert.ok(sprites.tiny.trex.join("").includes("k"), "Rex keeps its eye");
+  assert.ok(sprites.tiny.dog.join("").includes("T"), "dog keeps its collar");
+  assert.ok(sprites.tiny.cow.join("").includes("P"), "cow keeps its muzzle");
+  assert.ok(
+    sprites.tiny.sixseven.some((line) => line.startsWith("r r")),
+    "67 keeps the counter inside 6",
+  );
+});
 test("solid-cell ANSI artwork preserves every source pixel without block glyphs", async () => {
   const { Terminal } = require("@xterm/headless");
   for (const pet of Object.keys(sprites.art)) {
@@ -76,7 +118,7 @@ test("solid-cell ANSI artwork preserves every source pixel without block glyphs"
         petFrame: 0,
       };
       const columns = 100,
-        rows = petCompact ? 8 : 10;
+        rows = petCompact ? sprites.tiny[pet].length : 10;
       const source = scene(state, Math.floor((columns - 5) / 2) + 2, 0);
       const output = render(state, { columns, rows });
       assert.ok(output.playable);

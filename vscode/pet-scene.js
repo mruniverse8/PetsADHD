@@ -9,15 +9,24 @@ function compact(state) {
   return state.petCompact !== false && pixelSize(state.pixelSize) === 1;
 }
 function rows(state) {
+  if (state.petCells && compact(state))
+    return sprite(state.pet, 1, true, true).length;
   return (compact(state) ? 4 : 5) * (state.petCells ? 2 : 1);
 }
-function sprite(pet, size, small) {
-  const art = size === 2 ? sprites.chunky : small ? sprites.small : sprites.art;
+function sprite(pet, size, small, cells = false) {
+  const art =
+    cells && small
+      ? sprites.tiny
+      : size === 2
+        ? sprites.chunky
+        : small
+          ? sprites.small
+          : sprites.art;
   return art[pet] || art.trex;
 }
-function pose(pet, columns, frame, pixels = 1, small = true) {
+function pose(pet, columns, frame, pixels = 1, small = true, cells = false) {
   const scale = pixelSize(pixels),
-    source = sprite(pet, scale, small);
+    source = sprite(pet, scale, small, cells);
   const width = Math.max(...source.map((row) => row.length)) * scale;
   const span = Math.max(0, columns - 2 - width);
   const phase = span ? (Math.floor(frame / 2) + span) % (span * 2) : 0;
@@ -38,9 +47,16 @@ function scene(state, columns, frame) {
   const put = (x, y, color) => {
     if (x >= 0 && x < width && y >= 0 && y < height) grid[y][x] = color;
   };
-  const actor = pose(pet, columns, frame, state.pixelSize, compact(state));
-  let art = sprite(pet, actor.scale, compact(state)).map((row) =>
-    row.padEnd(actor.width / actor.scale, " ").split(""),
+  const actor = pose(
+    pet,
+    columns,
+    frame,
+    state.pixelSize,
+    compact(state),
+    state.petCells,
+  );
+  let art = sprite(pet, actor.scale, compact(state), state.petCells).map(
+    (row) => row.padEnd(actor.width / actor.scale, " ").split(""),
   );
   // Alternate the feet inside the existing sprite bounds. Numbers stay upright.
   if (pet !== "sixseven" && Math.floor(frame / 4) % 2) {
@@ -62,6 +78,10 @@ function scene(state, columns, frame) {
     }),
   );
   if (state.petFire > 0) {
+    const fireY =
+      state.petCells && compact(state)
+        ? { trex: 1, dog: 1, cow: 2, duck: 0, sixseven: 2 }[pet]
+        : 3;
     const muzzle = actor.direction > 0 ? actor.x + actor.width : actor.x - 1;
     const length = Math.min(12, 3 + state.petFire);
     for (let d = 0; d < length; d++) {
@@ -71,7 +91,7 @@ function scene(state, columns, frame) {
         const edge = Math.abs(dy) === spread || d === length - 1;
         put(
           x,
-          3 + dy,
+          fireY + dy,
           edge ? "#ed643d" : (d + frame) % 2 ? "#ffd36b" : "#fff0ae",
         );
       }

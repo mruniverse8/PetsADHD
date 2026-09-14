@@ -44,7 +44,7 @@ function draw(grid, event, frame) {
   if (!event) return;
   const width = grid[0].length,
     cx = Math.floor(width * (0.18 + (event.seed % 47) / 100)),
-    cy = 3;
+    cy = Math.min(3, grid.length - 2);
   const put = (x, y, color) => {
     if (x >= 0 && x < width && y >= 0 && y < grid.length) grid[y][x] = color;
   };

@@ -193,6 +193,7 @@ function render(state, dimensions, frame = 0, suspended = false, theme) {
       0,
       state.pixelSize,
       pets.compact(state),
+      state.petCells,
     );
     const neededColumns = Math.max(
       28,
