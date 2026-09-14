@@ -10,6 +10,12 @@ local function send(s, value)
   end
 end
 
+local function colors(s)
+  local normal = require("petsadhd.theme").normal()
+  vim.api.nvim_set_hl(0, "PetsADHDTerminalBackground", { fg = normal.foreground, bg = normal.background })
+  send(s, "\27]51;PetsADHDTheme;" .. vim.json.encode(normal) .. "\7")
+end
+
 local function visible(s)
   for _, win in ipairs(vim.fn.win_findbuf(s.buf)) do
     if vim.api.nvim_win_is_valid(win) then
@@ -115,6 +121,12 @@ end
 local function watch(s)
   local group = vim.api.nvim_create_augroup("PetsADHDTerminal" .. s.buf, { clear = true })
   s.group = group
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    group = group,
+    callback = function()
+      colors(s)
+    end,
+  })
   vim.api.nvim_create_autocmd("TermRequest", {
     group = group,
     buffer = s.buf,
@@ -263,6 +275,7 @@ function M.open(mode)
             pixelSize = config.pixel_size,
             speed = config.speed,
             music = enabled,
+            theme = require("petsadhd.theme").normal(),
           }),
           TERM = "xterm-256color",
           COLORTERM = "truecolor",
@@ -294,6 +307,7 @@ function M.open(mode)
     end
   end
   s.win = win
+  colors(s)
   for option, value in pairs({
     number = false,
     relativenumber = false,
@@ -301,6 +315,7 @@ function M.open(mode)
     foldcolumn = "0",
     winfixheight = true,
     statusline = "PetsADHD",
+    winhighlight = "Normal:PetsADHDTerminalBackground,NormalNC:PetsADHDTerminalBackground,EndOfBuffer:PetsADHDTerminalBackground",
   }) do
     vim.wo[win][option] = value
   end

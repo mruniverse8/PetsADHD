@@ -327,7 +327,10 @@ function M.setup(opts)
   })
   local group = vim.api.nvim_create_augroup("SpaceInvaders", { clear = true })
   local function colors()
-    vim.api.nvim_set_hl(0, "InvadersBackground", { fg = "#c6d0f5", bg = "#111827" })
+    local theme = require("petsadhd.theme")
+    local normal = theme.normal()
+    theme.border()
+    vim.api.nvim_set_hl(0, "InvadersBackground", { fg = normal.foreground, bg = normal.background })
     for name, color in pairs({
       Alien1 = "#c6a0f6",
       Alien2 = "#a6da95",
@@ -341,7 +344,11 @@ function M.setup(opts)
       Bomb = "#ff8095",
       Stars = "#46516a",
     }) do
-      vim.api.nvim_set_hl(0, "Invaders" .. name, { fg = color, bold = name ~= "Stars" })
+      vim.api.nvim_set_hl(0, "Invaders" .. name, {
+        fg = theme.contrast(color, normal.background, 3),
+        bg = normal.background,
+        bold = name ~= "Stars",
+      })
     end
   end
   colors()

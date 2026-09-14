@@ -100,6 +100,19 @@ Default shortcuts: `<leader>uP` opens/minimizes the bottom terminal, `<leader>uA
 `<leader>uI` opens Invaders. Game controls are local to their scratch buffers.
 The sidebar habitat remains available through `:PetToggle`.
 
+PetsADHD follows the active Neovim theme's `Normal` background and foreground.
+Text, borders, weather and game colors adjust for contrast on light and dark
+backgrounds and refresh on `:colorscheme`, including already open or minimized
+terminal sessions. Transparent themes use a light or dark opaque fallback for
+the plugin's surfaces. VS Code selects a light or dark palette from its active
+theme kind, including high contrast themes. The bottom terminal's sunset and
+pet artwork retain their original colors and details.
+
+On macOS, use a monospace font with Unicode block characters and a terminal
+supporting truecolor. Missing explorer or status-line icons in LazyVim need a
+Nerd Font installed and selected in the terminal profile; those icons are not
+provided by PetsADHD.
+
 In the bottom terminal, **n** cycles Rex, dog, cow, duck and 67; **s** selects the
 four-row small layout with fine 1× pixels and collapses the menu; **S** restores
 the original five-row artwork. The compact poses keep the palette, eyes, collar,
@@ -220,6 +233,8 @@ Neovim app names may have a different data directory; set `music.extractor` then
 Tests cover both game simulations, controls, resizing, pet rendering/persistence,
 plugin setup, audio-process lifecycle, and the real bottom terminal's render,
 resize, focus, hide/resume and disk persistence. The terminal integration test
+and theme regression tests cover light, dark, low-contrast and transparent
+backgrounds, live theme updates and palette isolation. The terminal test
 also needs Node.js; it is skipped if Node.js is absent. Tests do not access the
 network or play audio. Optional real Snacks integration:
 

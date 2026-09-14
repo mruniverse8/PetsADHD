@@ -323,7 +323,10 @@ function M.setup(opts)
   })
   local group = vim.api.nvim_create_augroup("AstraGame", { clear = true })
   local function colors()
-    vim.api.nvim_set_hl(0, "AstraBackground", { fg = "#c6d0f5", bg = "#171b2c" })
+    local theme = require("petsadhd.theme")
+    local normal = theme.normal()
+    theme.border()
+    vim.api.nvim_set_hl(0, "AstraBackground", { fg = normal.foreground, bg = normal.background })
     for kind, color in pairs({
       I = "#8bd5ef",
       O = "#eed49f",
@@ -334,9 +337,17 @@ function M.setup(opts)
       L = "#f5a97f",
       Garbage = "#6e789e",
     }) do
-      vim.api.nvim_set_hl(0, "Astra" .. kind, { fg = "#171b2c", bg = color, bold = true })
+      color = theme.contrast(color, normal.background, 3)
+      vim.api.nvim_set_hl(0, "Astra" .. kind, {
+        fg = theme.contrast("#171b2c", color, 4.5),
+        bg = color,
+        bold = true,
+      })
     end
-    vim.api.nvim_set_hl(0, "AstraGhost", { fg = "#6e789e" })
+    vim.api.nvim_set_hl(0, "AstraGhost", {
+      fg = theme.contrast("#6e789e", normal.background, 3),
+      bg = normal.background,
+    })
   end
   colors()
   vim.api.nvim_create_autocmd("ColorScheme", { group = group, callback = colors })

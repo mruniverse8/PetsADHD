@@ -11,6 +11,13 @@ function activate(context) {
     lastAudio = "",
     shuttingDown = false;
   const setting = () => vscode.workspace.getConfiguration("petsadhd");
+  const theme = () => {
+    const kind = vscode.window.activeColorTheme.kind;
+    return kind === vscode.ColorThemeKind.Light ||
+      kind === vscode.ColorThemeKind.HighContrastLight
+      ? { background: "#f5f5f5", foreground: "#252932" }
+      : { background: "#101725", foreground: "#cad7e5" };
+  };
   const music = new Music(
     () => ({
       url:
@@ -78,6 +85,7 @@ function activate(context) {
         pet: context.globalState.get("pet", "trex"),
         speed: setting().get("tetris.speed", 1),
         pixelSize: setting().get("pets.pixelSize", 1),
+        theme: theme(),
         fit: () => {
           void resize().catch((error) =>
             vscode.window.showWarningMessage("PetsADHD: " + error.message),
@@ -161,6 +169,7 @@ function activate(context) {
       pty?.setFocused(active === terminal),
     ),
     vscode.window.onDidChangeActiveTextEditor(() => pty?.setFocused(false)),
+    vscode.window.onDidChangeActiveColorTheme(() => pty?.setTheme(theme())),
     vscode.window.onDidChangeWindowState((state) =>
       pty?.setFocused(
         state.focused && vscode.window.activeTerminal === terminal,

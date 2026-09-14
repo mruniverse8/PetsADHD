@@ -49,6 +49,15 @@ BOTTOM TERMINAL                                          *petsadhd-terminal*
     Requires Node.js 18+, Unicode block characters and truecolor; no npm
     dependencies or browser. Existing Lua games work without Node.js.
 
+THEMES                                                     *petsadhd-themes*
+    Plugin surfaces use the current Normal background/foreground. Text, game
+    colors and sidebar weather adjust for contrast on light and dark themes.
+    :colorscheme refreshes open and minimized terminal sessions without
+    restarting their process or modifying other buffers' ANSI palettes.
+    Transparent themes use an opaque light/dark fallback. Terminal sunset
+    scenery and sprite artwork preserve their original colors and details.
+    VS Code follows the active light/dark or high contrast theme kind.
+
 LUA FLOATING GAMES
     Tetris: h/l or arrows move, j soft drops, k/x rotates, z rotates back,
     Space hard drops. Invaders: h/l or arrows move, a fires, M toggles music.

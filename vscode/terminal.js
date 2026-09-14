@@ -1,6 +1,7 @@
 "use strict";
 const E = require("./media/engine");
 const { render } = require("./terminal-renderer");
+const { palette, valid } = require("./terminal-theme");
 const space = require("./space-events");
 const modes = ["menu", "pets", "tetris", "duel", "invaders"];
 const help = {
@@ -14,6 +15,7 @@ const help = {
 class ArcadeTerminal {
   constructor(vscode, options) {
     this.options = options;
+    this.theme = palette(options.theme);
     this.write = new vscode.EventEmitter();
     this.onDidWrite = this.write.event;
     this.dimensions = { columns: 80, rows: 24 };
@@ -101,6 +103,11 @@ class ArcadeTerminal {
     this.focused = focused;
     this.redraw();
   }
+  setTheme(theme) {
+    if (!valid(theme?.background) || !valid(theme?.foreground)) return;
+    this.theme = palette(theme);
+    this.redraw(true);
+  }
   select(mode, fit = true) {
     if (modes.includes(mode)) this.state.mode = mode;
     this.hidden = false;
@@ -125,6 +132,7 @@ class ArcadeTerminal {
       this.dimensions,
       this.frame,
       !this.focused,
+      this.theme,
     );
     this.playable = rendered.playable;
     let output = force ? "\x1b[2J" : "";
@@ -177,6 +185,23 @@ class ArcadeTerminal {
         this.pendingInput = this.pendingInput.slice(end + 6);
         continue;
       }
+      // Theme updates from the Neovim host may span multiple PTY callbacks.
+      // Consume OSC sequences atomically so their payload never becomes game keys.
+      if (this.pendingInput.startsWith("\x1b]")) {
+        const end = this.pendingInput.search(/\x07|\x1b\\/);
+        if (end < 0) return;
+        const sequence = this.pendingInput.slice(2, end);
+        this.pendingInput = this.pendingInput.slice(
+          end + (this.pendingInput[end] === "\x07" ? 1 : 2),
+        );
+        const prefix = "51;PetsADHDTheme;";
+        if (sequence.startsWith(prefix)) {
+          try {
+            this.setTheme(JSON.parse(sequence.slice(prefix.length)));
+          } catch {}
+        }
+        continue;
+      }
       let key;
       if (this.pendingInput[0] === "\x1b") {
         if (this.pendingInput.length === 1) return;
@@ -193,11 +218,7 @@ class ArcadeTerminal {
         key = this.pendingInput[0];
         this.pendingInput = this.pendingInput.slice(1);
       }
-      if (key) this.key(key);
-      if (this.hidden) {
-        this.pendingInput = "";
-        break;
-      }
+      if (key && !this.hidden) this.key(key);
     }
   }
   key(key) {

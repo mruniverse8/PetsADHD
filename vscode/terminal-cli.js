@@ -74,6 +74,7 @@ function main() {
       pixelSize: config.pixelSize || 1,
       speed: config.speed || 1,
       music: config.music !== false,
+      theme: config.theme,
       save,
       audio: (state, paused) => {
         const value = JSON.stringify({
@@ -139,7 +140,7 @@ function main() {
           part === "\x06" || ["pets", "menu"].includes(session.state.mode),
         );
         session.save();
-      } else if (!session.hidden) session.handleInput(part);
+      } else session.handleInput(part);
     }
   });
   process.stdin.on("end", stop);

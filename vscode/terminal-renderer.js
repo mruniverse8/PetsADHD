@@ -1,9 +1,7 @@
 "use strict";
 const E = require("./media/engine");
 const pets = require("./pet-scene");
-const BG = "#101725",
-  FG = "#cad7e5",
-  BORDER = "#536780";
+const { palette, contrast } = require("./terminal-theme");
 const colors = {
   I: "#8bd5ef",
   O: "#eed49f",
@@ -17,7 +15,14 @@ const colors = {
 };
 const rgb = (hex) =>
   [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(";");
-function render(state, dimensions, frame = 0, suspended = false) {
+function render(state, dimensions, frame = 0, suspended = false, theme) {
+  const ui = palette(theme),
+    BG = ui.background,
+    FG = ui.foreground,
+    BORDER = ui.border;
+  const blocks = Object.fromEntries(
+    Object.entries(colors).map(([key, color]) => [key, contrast(color, BG, 3)]),
+  );
   const cols = Math.max(1, Math.min(500, dimensions.columns)),
     rows = Math.max(1, Math.min(200, dimensions.rows));
   const screen = Array.from({ length: rows }, () =>
@@ -56,7 +61,7 @@ function render(state, dimensions, frame = 0, suspended = false) {
   }[mode];
   const compactUI = mode === "pets" || mode === "menu";
   if (!compactUI) {
-    text(0, 0, `PetsADHD / ${title}`, "#8bd5ef");
+    text(0, 0, `PetsADHD / ${title}`, ui.accent);
     text(0, rows - 2, "m hide  p pause  r restart  M music", BORDER);
     text(0, rows - 1, "Tab menu  ? controls  q quit", BORDER);
   }
@@ -77,25 +82,31 @@ function render(state, dimensions, frame = 0, suspended = false) {
           y = 2 + (stacked ? i * height : 0);
         border(x, y, 10 * scale, 10 * scale);
         pixels(
-          E.grid(p).map((row) => row.map((v) => colors[v])),
+          E.grid(p).map((row) => row.map((v) => blocks[v])),
           x + 1,
           y + 1,
           scale,
         );
         const sx = x + 10 * scale + 3;
-        text(sx, y, dual ? `PLAYER ${i + 1}` : "SOLO", "#8bd5ef");
+        text(sx, y, dual ? `PLAYER ${i + 1}` : "SOLO", ui.accent);
         text(sx, y + 1, `Score ${p.score}`);
         text(sx, y + 2, `Lines ${p.lines}`);
         text(sx, y + 3, `Level ${p.level}`);
         text(sx, y + 4, `Speed ${p.speed}x`);
         text(sx, y + 5, `Next ${p.next}`);
         pixels(
-          E.shapes[p.next].map((row) => [...row].map((c) => colors[c])),
+          E.shapes[p.next].map((row) => [...row].map((c) => blocks[c])),
           sx,
           y + 6,
           2,
         );
-        if (dual) text(sx, y + 10, `Attack +${p.pending}`, "#ed8796");
+        if (dual)
+          text(
+            sx,
+            y + 10,
+            `Attack +${p.pending}`,
+            contrast("#ed8796", BG, 4.5),
+          );
       });
     } else text(0, 3, `Resize: ${panelWidth}x${neededRows} minimum`);
   } else if (mode === "invaders") {
@@ -103,8 +114,13 @@ function render(state, dimensions, frame = 0, suspended = false) {
     if (playable) {
       const full = rows >= 30;
       const grid = Array.from({ length: 24 }, () => Array(66).fill(null));
+      const spriteColors = new Map();
       const pixel = (x, y, color) => {
-        if (grid[y] && x >= 0 && x < 66) grid[y][x] = color;
+        if (grid[y] && x >= 0 && x < 66) {
+          if (!spriteColors.has(color))
+            spriteColors.set(color, contrast(color, BG, 3));
+          grid[y][x] = spriteColors.get(color);
+        }
       };
       for (let y = 0; y < 24; y++)
         for (let x = 0; x < 66; x++)
@@ -172,9 +188,9 @@ function render(state, dimensions, frame = 0, suspended = false) {
       const scene = pets.scene(state, sceneColumns, state.petFrame ?? frame);
       pixels(scene.grid, 1, rows - height);
       for (let y = 0; y < height; y++)
-        put(sceneColumns, rows - height + y, "│", "#967786");
+        put(sceneColumns, rows - height + y, "│", ui.separator);
       menu.lines.forEach((line, y) =>
-        text(sceneColumns + 1, rows - height + y, line, "#8bd5ef"),
+        text(sceneColumns + 1, rows - height + y, line, ui.accent),
       );
     } else text(0, 0, `Resize: ${neededColumns} cols x ${height} rows`);
   }
@@ -195,7 +211,7 @@ function render(state, dimensions, frame = 0, suspended = false) {
             : mode === "pets"
               ? `${state.pet} / ${state.weather}`
               : "";
-  if (!compactUI) text(0, 1, status, "#eed49f");
+  if (!compactUI) text(0, 1, status, ui.status);
   const lines = screen.map((row) => {
     let fg,
       bg,

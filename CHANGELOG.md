@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Follow light and dark editor themes in Neovim plugin surfaces and terminal UI; VS Code follows the active theme kind.
+- Adjust text, borders, sidebar weather and game colors for contrast while preserving the terminal's sunset and pet artwork.
+- Refresh open and minimized terminal sessions on theme changes without restarting games or changing global ANSI palettes.
+- Add light, dark, low-contrast, transparent, ANSI-rendering and live theme-change regression tests.
+
 ## 0.3.12
 
 - Default to four-row pets with crisp fine pixels and a collapsed menu on the right; Tab expands or collapses it beside the scene.

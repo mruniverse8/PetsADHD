@@ -60,6 +60,17 @@ assert(
   table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false)):find("▀", 1, true),
   "actual terminal displays colored half-block pixels"
 )
+-- Changing themes updates the live pane without recreating its PTY or touching
+-- the user's global ANSI palette (other terminal buffers may depend on it).
+vim.g.terminal_color_8 = "#123456"
+for _, colors in ipairs({ { fg = 0x3c3836, bg = 0xfbf1c7 }, { fg = 0xc8d3f5, bg = 0x222436 } }) do
+  vim.api.nvim_set_hl(0, "Normal", colors)
+  vim.api.nvim_exec_autocmds("ColorScheme", {})
+  local hl = vim.api.nvim_get_hl(0, { name = "PetsADHDTerminalBackground" })
+  assert(hl.bg == colors.bg, "live terminal uses the new theme background")
+  assert(vim.b[buf].terminal_job_id == job, "theme change retains the PTY")
+  assert(vim.g.terminal_color_8 == "#123456", "global ANSI palette is preserved")
+end
 local function input(keys)
   vim.api.nvim_chan_send(job, keys)
 end

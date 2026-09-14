@@ -142,7 +142,15 @@ function M.new(opts)
       end
       s.win = vim.api.nvim_open_win(s.buf, true, config)
       vim.wo[s.win].wrap = false
-      vim.wo[s.win].winhighlight = "Normal:" .. opts.background .. ",NormalFloat:" .. opts.background
+      vim.wo[s.win].winhighlight = "Normal:"
+        .. opts.background
+        .. ",NormalFloat:"
+        .. opts.background
+        .. ",NormalNC:"
+        .. opts.background
+        .. ",EndOfBuffer:"
+        .. opts.background
+        .. ",FloatBorder:PetsADHDGameBorder,FloatTitle:PetsADHDGameBorder"
       foreground = controller
       start_timer(s)
       draw(s)
@@ -166,7 +174,15 @@ function M.new(opts)
     s.music = require("petsadhd.audio").new(music)
     session, foreground = s, controller
     vim.wo[s.win].wrap = false
-    vim.wo[s.win].winhighlight = "Normal:" .. opts.background .. ",NormalFloat:" .. opts.background
+    vim.wo[s.win].winhighlight = "Normal:"
+      .. opts.background
+      .. ",NormalFloat:"
+      .. opts.background
+      .. ",NormalNC:"
+      .. opts.background
+      .. ",EndOfBuffer:"
+      .. opts.background
+      .. ",FloatBorder:PetsADHDGameBorder,FloatTitle:PetsADHDGameBorder"
     local handlers = {}
     for key, action in pairs(opts.keys) do
       handlers[key] = function()

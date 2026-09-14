@@ -464,16 +464,25 @@ function M.setup(opts)
   end
   local group = vim.api.nvim_create_augroup("SidebarPets", { clear = true })
   local function colors()
-    local bg = vim.api.nvim_get_hl(0, { name = "Normal", link = false }).bg
-    vim.api.nvim_set_hl(0, "SidebarDog", { fg = "#d9ad78", bg = bg })
-    vim.api.nvim_set_hl(0, "SidebarTRex", { fg = "#a3c76f", bg = bg })
-    vim.api.nvim_set_hl(0, "SidebarDuck", { fg = "#e5c76b", bg = bg })
-    vim.api.nvim_set_hl(0, "SidebarSixSeven", { fg = "#7bbbe8", bg = bg })
-    local colors_with_space = vim.tbl_extend("force", palette, { _ = bg or "NONE" })
+    local theme = require("petsadhd.theme")
+    local bg = theme.normal().background
+    for name, color in pairs({
+      SidebarDog = "#d9ad78",
+      SidebarTRex = "#a3c76f",
+      SidebarDuck = "#e5c76b",
+      SidebarSixSeven = "#7bbbe8",
+    }) do
+      vim.api.nvim_set_hl(0, name, { fg = theme.contrast(color, bg, 3), bg = bg })
+    end
+    local colors_with_space = { _ = bg }
+    for key, color in pairs(palette) do
+      -- Eyes and glints contrast with the coat, rather than the editor surface.
+      colors_with_space[key] = (key == "k" or key == "w") and color or theme.contrast(color, bg, 3)
+    end
     for top, top_color in pairs(colors_with_space) do
       for bottom, bottom_color in pairs(colors_with_space) do
         local fg = top == "_" and bottom_color or top_color
-        local cell_bg = top ~= "_" and bottom ~= "_" and top ~= bottom and bottom_color or (bg or "NONE")
+        local cell_bg = top ~= "_" and bottom ~= "_" and top ~= bottom and bottom_color or bg
         vim.api.nvim_set_hl(0, "PetPixel" .. top .. bottom, { fg = fg, bg = cell_bg })
       end
     end

@@ -21,7 +21,8 @@ module.exports = function host(saved) {
   const active = new EventEmitter(),
     editor = new EventEmitter(),
     focus = new EventEmitter(),
-    configuration = new EventEmitter();
+    configuration = new EventEmitter(),
+    theme = new EventEmitter();
   const config = {
     "music.enabled": true,
     "music.url": "https://www.youtube.com/watch?v=5vaaOqLHxrE",
@@ -42,6 +43,12 @@ module.exports = function host(saved) {
       }
     },
     TerminalLocation: { Panel: 1 },
+    ColorThemeKind: {
+      Light: 1,
+      Dark: 2,
+      HighContrast: 3,
+      HighContrastLight: 4,
+    },
     ConfigurationTarget: { Global: 1 },
     commands: {
       registerCommand: (name, callback) => {
@@ -64,11 +71,13 @@ module.exports = function host(saved) {
     },
     window: {
       activeTerminal: undefined,
+      activeColorTheme: { kind: 2 },
       showWarningMessage: () => {},
       showInformationMessage: () => {},
       showQuickPick: async () => "Right",
       onDidChangeActiveTerminal: active.event,
       onDidChangeActiveTextEditor: editor.event,
+      onDidChangeActiveColorTheme: theme.event,
       onDidChangeWindowState: focus.event,
       createTerminal(options) {
         const t = {
@@ -142,6 +151,7 @@ module.exports = function host(saved) {
     active,
     editor,
     focus,
+    theme,
     context,
     dispose: () => context.subscriptions.forEach((d) => d.dispose()),
   };
