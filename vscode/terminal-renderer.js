@@ -41,7 +41,16 @@ function render(state, dimensions, frame = 0, suspended = false, theme) {
     }
     text(x, y + h + 1, "└" + "─".repeat(w) + "┘", BORDER);
   };
-  const pixels = (grid, x, y, scale = 1) => {
+  const pixels = (grid, x, y, scale = 1, cells = false) => {
+    if (cells) {
+      grid.forEach((row, py) =>
+        row.forEach((color, px) => {
+          put(x + px * 2, y + py, " ", FG, color || BG);
+          put(x + px * 2 + 1, y + py, " ", FG, color || BG);
+        }),
+      );
+      return;
+    }
     for (let py = 0; py < grid.length * scale; py += 2)
       for (let px = 0; px < grid[0].length * scale; px++) {
         const top = grid[Math.floor(py / scale)][Math.floor(px / scale)] || BG;
@@ -174,7 +183,10 @@ function render(state, dimensions, frame = 0, suspended = false, theme) {
   } else if (compactUI) {
     const height = pets.rows(state);
     const menu = pets.menu(state, cols, state.petFrame ?? frame);
-    const sceneColumns = cols - menu.width;
+    const separatorColumn = cols - menu.width;
+    const sceneColumns = state.petCells
+      ? Math.floor((separatorColumn - 1) / 2) + 2
+      : separatorColumn;
     const actor = pets.pose(
       state.pet || "trex",
       sceneColumns,
@@ -182,15 +194,20 @@ function render(state, dimensions, frame = 0, suspended = false, theme) {
       state.pixelSize,
       pets.compact(state),
     );
-    const neededColumns = Math.max(28, actor.width + menu.width + 2);
+    const neededColumns = Math.max(
+      28,
+      actor.width * (state.petCells ? 2 : 1) +
+        menu.width +
+        (state.petCells ? 3 : 2),
+    );
     playable = cols >= neededColumns && rows >= height;
     if (playable) {
       const scene = pets.scene(state, sceneColumns, state.petFrame ?? frame);
-      pixels(scene.grid, 1, rows - height);
+      pixels(scene.grid, 1, rows - height, 1, state.petCells);
       for (let y = 0; y < height; y++)
-        put(sceneColumns, rows - height + y, "│", ui.separator);
+        put(separatorColumn, rows - height + y, "│", ui.separator);
       menu.lines.forEach((line, y) =>
-        text(sceneColumns + 1, rows - height + y, line, ui.accent),
+        text(separatorColumn + 1, rows - height + y, line, ui.accent),
       );
     } else text(0, 0, `Resize: ${neededColumns} cols x ${height} rows`);
   }

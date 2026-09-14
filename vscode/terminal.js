@@ -30,6 +30,8 @@ class ArcadeTerminal {
         : options.pet || "trex",
       weather: "sunset",
       appearanceVersion: 2,
+      // Host capability is recomputed on launch, never restored from a save.
+      petCells: options.petCells === true,
       petCompact:
         saved.appearanceVersion === 2 ? saved.petCompact !== false : true,
       spaceSeed: saved.spaceSeed || Math.floor(Math.random() * 0x7fffffff) + 1,

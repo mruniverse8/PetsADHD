@@ -150,7 +150,7 @@ local function watch(s)
           end
         elseif value.kind == "mode" and modes[value.mode] then
           s.mode = value.mode
-          s.pet_rows = value.rows == 5 and 5 or 4
+          s.pet_rows = vim.tbl_contains({ 4, 5, 8, 10 }, value.rows) and value.rows or 4
           fit(s)
         elseif value.kind == "audio" and modes[value.mode] then
           audio(s, value)
@@ -273,6 +273,7 @@ function M.open(mode)
             mode = mode,
             pet = config.pet,
             pixelSize = config.pixel_size,
+            petCells = require("petsadhd.pixels").cells(config.pixel_rendering),
             speed = config.speed,
             music = enabled,
             theme = require("petsadhd.theme").normal(),

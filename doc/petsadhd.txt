@@ -58,6 +58,13 @@ THEMES                                                     *petsadhd-themes*
     scenery and sprite artwork preserve their original colors and details.
     VS Code follows the active light/dark or high contrast theme kind.
 
+    Apple Terminal uses solid background cells for pets to avoid gaps and
+    uneven block-glyph heights. Each pixel uses two columns and one row.
+    The bottom pet pane needs 8 rows (10 for original art). Sidebar pets need
+    more space; select small pets in narrow explorers. Games keep their layout.
+    pets.pixel_rendering and terminal.pixel_rendering accept auto (default),
+    half (compact block glyphs), or cells (solid background cells).
+
 LUA FLOATING GAMES
     Tetris: h/l or arrows move, j soft drops, k/x rotates, z rotates back,
     Space hard drops. Invaders: h/l or arrows move, a fires, M toggles music.

@@ -72,6 +72,7 @@ function main() {
       saved,
       pet: config.pet || "trex",
       pixelSize: config.pixelSize || 1,
+      petCells: config.petCells === true,
       speed: config.speed || 1,
       music: config.music !== false,
       theme: config.theme,

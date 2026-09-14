@@ -9,7 +9,7 @@ function compact(state) {
   return state.petCompact !== false && pixelSize(state.pixelSize) === 1;
 }
 function rows(state) {
-  return compact(state) ? 4 : 5;
+  return (compact(state) ? 4 : 5) * (state.petCells ? 2 : 1);
 }
 function sprite(pet, size, small) {
   const art = size === 2 ? sprites.chunky : small ? sprites.small : sprites.art;
@@ -31,7 +31,7 @@ function pose(pet, columns, frame, pixels = 1, small = true) {
 function scene(state, columns, frame) {
   const pet = sprites.art[state.pet] ? state.pet : "trex";
   const width = columns - 2,
-    height = rows(state) * 2;
+    height = rows(state) * (state.petCells ? 1 : 2);
   const grid = sunset(width, frame, height);
   const event = space.eventAt(state, frame);
   space.draw(grid, event, frame);

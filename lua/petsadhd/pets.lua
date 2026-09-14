@@ -8,6 +8,10 @@ local companions = { trex = "SidebarTRex", dog = "SidebarDog", duck = "SidebarDu
 local size_mode = "big"
 local size_heights = { small = 7, big = 12 }
 local footer_height = 12
+local cell_pixels = false
+local function height(size)
+  return size_heights[size] * (cell_pixels and 2 or 1) - (cell_pixels and 2 or 0)
+end
 local weather_mode = "auto"
 local namespace = vim.api.nvim_create_namespace("SidebarPets")
 
@@ -69,6 +73,9 @@ end
 -- Rendering a frame is deterministic, so movement and weather can be previewed.
 function M.render(width, frame)
   width = width or 40
+  if cell_pixels then
+    width = math.floor(width / 2)
+  end
   local t = frame or tick
   local dog = {
     "              ddd     ",
@@ -162,7 +169,7 @@ function M.render(width, frame)
   elseif companion ~= "sixseven" and size_mode == "small" then
     pixels = compact(pixels)
   end
-  local sprite_width, canvas_height = #pixels[1], footer_height * 2
+  local sprite_width, canvas_height = #pixels[1], cell_pixels and footer_height or size_heights[size_mode] * 2
   if width < sprite_width + 2 then
     return {}, {}
   end
@@ -232,6 +239,18 @@ function M.render(width, frame)
   -- Paint just one animal over the sky and rain, preserving its silhouette.
   paint(pixels, x, y, companion ~= "sixseven" and mirror)
   local lines, highlights = {}, {}
+  if cell_pixels then
+    for row = 1, canvas_height do
+      lines[#lines + 1] = string.rep(" ", width * 2)
+      for col = 1, width do
+        local color = canvas[row][col]
+        if color ~= " " then
+          highlights[#highlights + 1] = { row - 1, (col - 1) * 2, col * 2, "PetCell" .. color }
+        end
+      end
+    end
+    return lines, highlights, { animal = companion, x = x, y = y, weather = weather, size = size_mode }
+  end
   for row = 1, canvas_height, 2 do
     local cells, bytes = {}, 0
     for col = 1, width do
@@ -427,7 +446,7 @@ end
 function M.size(value)
   if value then
     assert(size_heights[value], "Choose small or big")
-    size_mode, footer_height = value, size_heights[value]
+    size_mode, footer_height = value, height(value)
     M.set(enabled, true)
   end
   return size_mode
@@ -439,6 +458,8 @@ function M.setup(opts)
   end
   ready = true
   opts = opts or {}
+  cell_pixels = require("petsadhd.pixels").cells(opts.pixel_rendering)
+  footer_height = height(size_mode)
   state_file = opts.state_file or (vim.fn.stdpath("state") .. "/petsadhd/pets-state")
   local ok, saved = pcall(vim.fn.readfile, state_file)
   if ok and companions[saved[2]] then
@@ -448,7 +469,7 @@ function M.setup(opts)
     weather_mode = saved[3]
   end
   if ok and size_heights[saved[4]] then
-    size_mode, footer_height = saved[4], size_heights[saved[4]]
+    size_mode, footer_height = saved[4], height(saved[4])
   end
   if opts.kind then
     assert(companions[opts.kind], "PetsADHD: invalid pet kind")
@@ -456,7 +477,7 @@ function M.setup(opts)
   end
   if opts.size then
     assert(size_heights[opts.size], "PetsADHD: choose small or big")
-    size_mode, footer_height = opts.size, size_heights[opts.size]
+    size_mode, footer_height = opts.size, height(opts.size)
   end
   if opts.weather then
     assert(vim.tbl_contains({ "auto", "sun", "rain" }, opts.weather), "PetsADHD: invalid weather")
@@ -478,11 +499,12 @@ function M.setup(opts)
     for key, color in pairs(palette) do
       -- Eyes and glints contrast with the coat, rather than the editor surface.
       colors_with_space[key] = (key == "k" or key == "w") and color or theme.contrast(color, bg, 3)
+      vim.api.nvim_set_hl(0, "PetCell" .. key, { bg = colors_with_space[key] })
     end
     for top, top_color in pairs(colors_with_space) do
       for bottom, bottom_color in pairs(colors_with_space) do
         local fg = top == "_" and bottom_color or top_color
-        local cell_bg = top ~= "_" and bottom ~= "_" and top ~= bottom and bottom_color or bg
+        local cell_bg = top ~= "_" and bottom ~= "_" and bottom_color or bg
         vim.api.nvim_set_hl(0, "PetPixel" .. top .. bottom, { fg = fg, bg = cell_bg })
       end
     end

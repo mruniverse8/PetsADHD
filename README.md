@@ -108,6 +108,14 @@ the plugin's surfaces. VS Code selects a light or dark palette from its active
 theme kind, including high contrast themes. The bottom terminal's sunset and
 pet artwork retain their original colors and details.
 
+Apple Terminal uses solid background cells for pet artwork because its block
+glyphs can leave gaps and uneven pixel heights. Each pixel occupies two columns
+and one row; the bottom pet pane expands to eight rows (ten for original art).
+Sidebar pets also need more space; use `pets.size = "small"` in a narrow explorer.
+Set `pixel_rendering = "half"` under `pets` or `terminal` to use compact block
+glyphs, or `"cells"` to force solid cells in another terminal. The default is
+`"auto"`. Games keep their existing layout.
+
 On macOS, use a monospace font with Unicode block characters and a terminal
 supporting truecolor. Missing explorer or status-line icons in LazyVim need a
 Nerd Font installed and selected in the terminal profile; those icons are not

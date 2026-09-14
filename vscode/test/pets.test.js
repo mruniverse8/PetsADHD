@@ -62,6 +62,57 @@ test("the arcade chooser expands on the right while keeping pets visible at narr
 });
 
 const { scene, pose, pixelSize, menu } = require("../pet-scene");
+test("solid-cell ANSI artwork preserves every source pixel without block glyphs", async () => {
+  const { Terminal } = require("@xterm/headless");
+  for (const pet of Object.keys(sprites.art)) {
+    for (const petCompact of [true, false]) {
+      const state = {
+        mode: "pets",
+        games: {},
+        pet,
+        petCells: true,
+        petCompact,
+        spaceSeed: 1,
+        petFrame: 0,
+      };
+      const columns = 100,
+        rows = petCompact ? 8 : 10;
+      const source = scene(state, Math.floor((columns - 5) / 2) + 2, 0);
+      const output = render(state, { columns, rows });
+      assert.ok(output.playable);
+      assert.ok(output.lines.every((line) => !plain(line).includes("▀")));
+      const terminal = new Terminal({
+        cols: columns,
+        rows,
+        allowProposedApi: true,
+      });
+      try {
+        await new Promise((resolve) =>
+          terminal.write("\x1b[?7l" + output.lines.join("\r\n"), resolve),
+        );
+        source.grid.forEach((row, y) =>
+          row.forEach((color, x) => {
+            for (const column of [1 + x * 2, 2 + x * 2]) {
+              const cell = terminal.buffer.active.getLine(y).getCell(column);
+              assert.equal(cell.getChars(), " ");
+              assert.equal(
+                cell.getBgColor(),
+                parseInt(color.slice(1), 16),
+                `${pet} pixel ${x},${y}`,
+              );
+            }
+          }),
+        );
+      } finally {
+        terminal.dispose();
+      }
+      assert.ok(
+        !render(state, { columns, rows: rows - 1 }).playable,
+        "undersized panes pause instead of clipping",
+      );
+    }
+  }
+});
 test("pets traverse the available width, face travel direction and retain their original dimensions", () => {
   for (const pet of Object.keys(sprites.art)) {
     const width = Math.max(...sprites.art[pet].map((row) => row.length));
