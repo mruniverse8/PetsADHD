@@ -117,6 +117,23 @@ Set `pixel_rendering = "half"` under `pets` or `terminal` to use compact block
 glyphs, or `"cells"` to force solid cells in another terminal. The default is
 `"auto"`. Games keep their existing layout.
 
+For fewer rows, try `:PetTerminalStyle braille`. It packs the original eight
+pixel rows into two terminal rows as a monochrome dotted silhouette. `Tab`
+expands the menu to four rows; `S` shows original art in three rows. The sidebar
+also supports `:PetStyle braille` (four rows including weather in small mode).
+Return with `:PetTerminalStyle auto` and `:PetStyle auto`.
+
+The experimental `:PetTerminalStyle bitmap` mode sends full-color pixel images through Snacks' Kitty
+graphics transport in compatible terminals such as Ghostty. It uses two rows
+for small pets, three for original art, and four for the menu. Apple Terminal
+and unsupported hosts fall back to solid cells. Bitmap mode is available only
+in the Neovim bottom terminal and needs Snacks and a Neovim terminal UI; it does
+not require ImageMagick or Chafa. Styles restart the bottom renderer using its
+saved session; games and pet selection are retained. To persist a style, set
+`terminal.pixel_rendering = "braille"` or `"bitmap"` and omit `terminal.height`
+to use its automatic minimum. Set `pets.pixel_rendering = "braille"` separately
+for the sidebar. Braille needs a font containing U+2800–U+28FF glyphs.
+
 On macOS, use a monospace font with Unicode block characters and a terminal
 supporting truecolor. Missing explorer or status-line icons in LazyVim need a
 Nerd Font installed and selected in the terminal profile; those icons are not
@@ -178,9 +195,10 @@ opts = {
   },
   tetris = { speed = 1 }, -- initial speed, 1–8
   terminal = {
-    height = 4,       -- bottom pet pane, minimum 4 rows
+    -- height = 4,    -- optional minimum; automatic 2 rows for braille/bitmap
     game_height = 18, -- expand when selecting a game
     pixel_size = 1,   -- fine pixels; s always restores small
+    -- pixel_rendering = "auto", -- auto, half, cells, braille, bitmap
     -- node = "/path/to/node", -- if Node.js is not on PATH
     -- pet = "dog",           -- first-run pet; also cow, trex, duck, sixseven
     -- state_file = "/path/to/terminal-session.json",

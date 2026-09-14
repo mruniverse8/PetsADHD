@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add optional two-row monochrome Braille pets, four-row small sidebar habitats, and commands to switch pixel styles while retaining saved sessions.
+- Add experimental full-color bitmap pets using Snacks' graphics transport in compatible Neovim terminal hosts, with solid-cell fallback in Apple Terminal and scoped image cleanup.
 - Avoid Apple Terminal block-glyph gaps with solid-cell pet rendering and hand-drawn four-row tiny animals (five rows for readable 67 digits); small sidebar pets and weather fit seven rows.
 
 - Follow light and dark editor themes in Neovim plugin surfaces and terminal UI; VS Code follows the active theme kind.

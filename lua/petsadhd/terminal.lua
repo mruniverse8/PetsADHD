@@ -31,7 +31,7 @@ local function fit(s)
   end
   s.win = win
   local compact = s.mode == "pets" or s.mode == "menu"
-  local height = compact and math.max(config.height, s.pet_rows or 4) or config.game_height
+  local height = compact and math.max(config.height, s.pet_rows or config.height) or config.game_height
   -- Leave room for the editor, tab/status/command lines and other splits.
   height = math.min(height, math.max(1, vim.o.lines - 6))
   pcall(vim.api.nvim_win_set_height, win, height)
@@ -72,6 +72,9 @@ function M.hide(from_child)
   end
   if not from_child then
     send(s, "\15")
+  end
+  if s.bitmap then
+    s.bitmap:clear()
   end
   if s.audio then
     s.audio:pause(true)
@@ -150,8 +153,22 @@ local function watch(s)
           end
         elseif value.kind == "mode" and modes[value.mode] then
           s.mode = value.mode
-          s.pet_rows = vim.tbl_contains({ 4, 5, 8, 10 }, value.rows) and value.rows or 4
+          s.pet_rows = vim.tbl_contains({ 2, 3, 4, 5, 8, 10 }, value.rows) and value.rows or 4
+          if s.bitmap then
+            s.bitmap:clear()
+          end
           fit(s)
+        elseif value.kind == "bitmap" and s.bitmap then
+          local win = visible(s)
+          if
+            win
+            and vim.api.nvim_win_get_tabpage(win) == vim.api.nvim_get_current_tabpage()
+            and (s.mode == "pets" or s.mode == "menu")
+          then
+            s.bitmap:draw(win, value.frame)
+          else
+            s.bitmap:clear()
+          end
         elseif value.kind == "audio" and modes[value.mode] then
           audio(s, value)
         elseif (value.kind == "help" or value.kind == "notice") and type(value.message) == "string" then
@@ -177,6 +194,9 @@ local function watch(s)
       vim.schedule(function()
         if session == s and not visible(s) then
           send(s, "\15")
+          if s.bitmap then
+            s.bitmap:clear()
+          end
           if s.audio then
             s.audio:pause(true)
           end
@@ -194,13 +214,27 @@ local function watch(s)
   vim.api.nvim_create_autocmd("VimResized", {
     group = group,
     callback = function()
+      if s.bitmap then
+        s.bitmap:clear()
+      end
       fit(s)
+    end,
+  })
+  vim.api.nvim_create_autocmd({ "WinResized", "WinScrolled", "TabLeave" }, {
+    group = group,
+    callback = function()
+      if s.bitmap then
+        s.bitmap:clear()
+      end
     end,
   })
   vim.api.nvim_create_autocmd("BufWipeout", {
     group = group,
     buffer = s.buf,
     callback = function()
+      if s.bitmap then
+        s.bitmap:clear()
+      end
       if s.audio then
         s.audio:stop()
       end
@@ -216,6 +250,9 @@ local function watch(s)
     group = group,
     callback = function()
       send(s, "\30")
+      if s.bitmap then
+        s.bitmap:clear()
+      end
       if s.audio then
         s.audio:stop()
       end
@@ -257,6 +294,9 @@ function M.open(mode)
     else
       s = { buf = empty, mode = mode or "pets", previous_buf = previous_buf }
       session = s
+      if config.renderer == "bitmap" then
+        s.bitmap = require("petsadhd.bitmap").new()
+      end
       watch(s)
       vim.bo[s.buf].bufhidden = "hide"
       local music = config.music
@@ -273,7 +313,9 @@ function M.open(mode)
             mode = mode,
             pet = config.pet,
             pixelSize = config.pixel_size,
-            petCells = require("petsadhd.pixels").cells(config.pixel_rendering),
+            petCells = config.renderer == "cells",
+            petBraille = config.renderer == "braille",
+            petBitmap = config.renderer == "bitmap",
             speed = config.speed,
             music = enabled,
             theme = require("petsadhd.theme").normal(),
@@ -282,6 +324,9 @@ function M.open(mode)
           COLORTERM = "truecolor",
         },
         on_exit = function(_, code)
+          if s.bitmap then
+            s.bitmap:clear()
+          end
           if s.audio then
             s.audio:stop()
           end
@@ -336,9 +381,24 @@ function M.toggle()
   end
 end
 
+function M.style(value)
+  local bitmap = value == "bitmap" and require("petsadhd.bitmap").supported()
+  local renderer = require("petsadhd.pixels").mode(value, bitmap)
+  local mode = session and session.mode
+  M.close()
+  config.pixel_rendering, config.renderer = value, renderer
+  config.height = (renderer == "braille" or renderer == "bitmap") and 2 or 4
+  vim.defer_fn(function()
+    M.open(mode)
+  end, 300)
+end
+
 function M.setup(opts)
-  config = vim.tbl_extend("force", { height = 4, game_height = 18, pixel_size = 1, speed = 1 }, opts or {})
-  config.height = math.max(4, math.floor(tonumber(config.height) or 4))
+  config = vim.tbl_extend("force", { game_height = 18, pixel_size = 1, speed = 1 }, opts or {})
+  local bitmap = config.pixel_rendering == "bitmap" and require("petsadhd.bitmap").supported()
+  config.renderer = require("petsadhd.pixels").mode(config.pixel_rendering, bitmap)
+  local minimum = (config.renderer == "braille" or config.renderer == "bitmap") and 2 or 4
+  config.height = math.max(minimum, math.floor(tonumber(config.height) or minimum))
   config.game_height = math.max(16, math.floor(tonumber(config.game_height) or 18))
   for _, name in ipairs({ "PetTerminal", "PetsADHDTerminal" }) do
     vim.api.nvim_create_user_command(name, function(args)
@@ -352,6 +412,15 @@ function M.setup(opts)
     })
   end
   vim.api.nvim_create_user_command("PetTerminalClose", M.close, { desc = "Save and close the PetsADHD terminal" })
+  vim.api.nvim_create_user_command("PetTerminalStyle", function(args)
+    M.style(args.args)
+  end, {
+    nargs = 1,
+    desc = "Change pet pixels and reopen the saved terminal session",
+    complete = function()
+      return { "auto", "cells", "half", "braille", "bitmap" }
+    end,
+  })
   if config.keymaps ~= false then
     vim.keymap.set("n", "<leader>uP", M.toggle, { desc = "Toggle PetsADHD terminal" })
   end

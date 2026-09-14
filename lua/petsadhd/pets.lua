@@ -8,8 +8,11 @@ local companions = { trex = "SidebarTRex", dog = "SidebarDog", duck = "SidebarDu
 local size_mode = "big"
 local size_heights = { small = 7, big = 12 }
 local footer_height = 12
-local cell_pixels = false
+local cell_pixels, braille_pixels = false, false
 local function height(size)
+  if braille_pixels then
+    return math.ceil(size_heights[size] / 2)
+  end
   if cell_pixels and size == "small" then
     return 7
   end
@@ -78,6 +81,8 @@ function M.render(width, frame)
   width = width or 40
   if cell_pixels then
     width = math.floor(width / 2)
+  elseif braille_pixels then
+    width = width * 2
   end
   local t = frame or tick
   local dog = {
@@ -276,6 +281,32 @@ function M.render(width, frame)
     end
     return lines, highlights, { animal = companion, x = x, y = y, weather = weather, size = size_mode }
   end
+  if braille_pixels then
+    local bits = { { 1, 8 }, { 2, 16 }, { 4, 32 }, { 64, 128 } }
+    for row = 1, canvas_height, 4 do
+      local glyphs, bytes = {}, 0
+      for col = 1, width, 2 do
+        local mask, color = 0, nil
+        for dy = 0, 3 do
+          for dx = 0, 1 do
+            local pixel = canvas[row + dy] and canvas[row + dy][col + dx]
+            if pixel and pixel ~= " " then
+              mask = mask + bits[dy + 1][dx + 1]
+              color = color or pixel
+            end
+          end
+        end
+        local glyph = mask > 0 and vim.fn.nr2char(0x2800 + mask) or " "
+        glyphs[#glyphs + 1] = glyph
+        if color then
+          highlights[#highlights + 1] = { #lines, bytes, bytes + #glyph, companions[companion] }
+        end
+        bytes = bytes + #glyph
+      end
+      lines[#lines + 1] = table.concat(glyphs)
+    end
+    return lines, highlights, { animal = companion, x = x, y = y, weather = weather, size = size_mode }
+  end
   for row = 1, canvas_height, 2 do
     local cells, bytes = {}, 0
     for col = 1, width do
@@ -468,6 +499,13 @@ function M.kind()
   return companion
 end
 
+function M.style(value)
+  local rendering = require("petsadhd.pixels").mode(value)
+  cell_pixels, braille_pixels = rendering == "cells", rendering == "braille"
+  footer_height = height(size_mode)
+  M.set(enabled, true)
+end
+
 function M.size(value)
   if value then
     assert(size_heights[value], "Choose small or big")
@@ -483,7 +521,8 @@ function M.setup(opts)
   end
   ready = true
   opts = opts or {}
-  cell_pixels = require("petsadhd.pixels").cells(opts.pixel_rendering)
+  local rendering = require("petsadhd.pixels").mode(opts.pixel_rendering)
+  cell_pixels, braille_pixels = rendering == "cells", rendering == "braille"
   footer_height = height(size_mode)
   state_file = opts.state_file or (vim.fn.stdpath("state") .. "/petsadhd/pets-state")
   local ok, saved = pcall(vim.fn.readfile, state_file)
@@ -577,6 +616,15 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("PetBig", function()
     M.size("big")
   end, { desc = "Detailed animal with a twelve-row habitat" })
+  vim.api.nvim_create_user_command("PetStyle", function(args)
+    M.style(args.args)
+  end, {
+    nargs = 1,
+    desc = "Change sidebar pet pixels",
+    complete = function()
+      return { "auto", "half", "cells", "braille" }
+    end,
+  })
   vim.api.nvim_create_user_command("PetDuck", function()
     M.select("duck")
   end, { desc = "Choose Quackers the duck" })

@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { ArcadeTerminal } = require("./terminal");
 const pets = require("./pet-scene");
+const { bitmap } = require("./terminal-pixels");
 class EventEmitter {
   listeners = new Set();
   event = (fn) => {
@@ -73,6 +74,11 @@ function main() {
       pet: config.pet || "trex",
       pixelSize: config.pixelSize || 1,
       petCells: config.petCells === true,
+      petBraille: config.petBraille === true,
+      petBitmap: config.petBitmap === true,
+      bitmap: config.petBitmap
+        ? (frame) => request({ kind: "bitmap", frame: frame && bitmap(frame) })
+        : undefined,
       speed: config.speed || 1,
       music: config.music !== false,
       theme: config.theme,

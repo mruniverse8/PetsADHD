@@ -9,6 +9,11 @@ function compact(state) {
   return state.petCompact !== false && pixelSize(state.pixelSize) === 1;
 }
 function rows(state) {
+  if (state.petBraille || state.petBitmap)
+    return Math.max(
+      state.mode === "menu" ? 4 : 2,
+      Math.ceil((compact(state) ? 8 : 10) / 4),
+    );
   if (state.petCells && compact(state))
     return sprite(state.pet, 1, true, true).length;
   return (compact(state) ? 4 : 5) * (state.petCells ? 2 : 1);
@@ -40,8 +45,13 @@ function pose(pet, columns, frame, pixels = 1, small = true, cells = false) {
 function scene(state, columns, frame) {
   const pet = sprites.art[state.pet] ? state.pet : "trex";
   const width = columns - 2,
-    height = rows(state) * (state.petCells ? 1 : 2);
-  const grid = sunset(width, frame, height);
+    height =
+      rows(state) *
+      (state.petCells ? 1 : state.petBraille || state.petBitmap ? 4 : 2);
+  // Braille shows the silhouette; a filled sunset would fill every dot.
+  const grid = state.petBraille
+    ? Array.from({ length: height }, () => Array(width).fill(null))
+    : sunset(width, frame, height);
   const event = space.eventAt(state, frame);
   space.draw(grid, event, frame);
   const put = (x, y, color) => {
@@ -101,7 +111,13 @@ function scene(state, columns, frame) {
 }
 function menu(state, columns, frame = state.petFrame || 0) {
   if (state.mode !== "menu")
-    return { width: 4, lines: ["Tab", " ?", " s", " m"] };
+    return {
+      width: 4,
+      lines:
+        state.petBraille || state.petBitmap
+          ? ["Tab", " ?"]
+          : ["Tab", " ?", " s", " m"],
+    };
   const width = columns >= 52 ? 28 : 7;
   const event = space.eventAt(state, frame);
   return {

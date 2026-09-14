@@ -6,7 +6,7 @@ const space = require("./space-events");
 const modes = ["menu", "pets", "tetris", "duel", "invaders"];
 const help = {
   menu: "Choose 1 Pets, 2 Tetris, 3 Competitive Tetris, or 4 Invaders. m hides the terminal and preserves your session.",
-  pets: "a: breathe fire. n: next pet (Rex, dog, cow, duck, 67). s: four-row small pets with fine pixels. S: original five-row artwork. e: summon a random space event. Sunset: clouds, mountains, reflections, occasional black holes, supernovas, comets, auroras and Saturn. m: hide. Tab: expand/collapse the right menu.",
+  pets: "a: breathe fire. n: next pet (Rex, dog, cow, duck, 67). s: small pets. S: original artwork. Pane height follows the pixel style. e: summon a random space event. Sunset: clouds, mountains, reflections, occasional black holes, supernovas, comets, auroras and Saturn. m: hide. Tab: expand/collapse the right menu.",
   tetris:
     "Arrows or h/j/k/l: move, soft drop, rotate. z: reverse rotate. Space: hard drop. + / -: speed 1–8.",
   duel: "Shared keyboard. P1: a/d move, s down, w/g rotate, f hard drop. P2: arrows, / reverse rotate, Enter hard drop. + / - changes both speeds.",
@@ -32,6 +32,8 @@ class ArcadeTerminal {
       appearanceVersion: 2,
       // Host capability is recomputed on launch, never restored from a save.
       petCells: options.petCells === true,
+      petBraille: options.petBraille === true,
+      petBitmap: options.petBitmap === true,
       petCompact:
         saved.appearanceVersion === 2 ? saved.petCompact !== false : true,
       spaceSeed: saved.spaceSeed || Math.floor(Math.random() * 0x7fffffff) + 1,
@@ -144,6 +146,7 @@ class ArcadeTerminal {
     });
     this.lines = rendered.lines;
     if (output) this.write.fire(output);
+    this.options.bitmap?.(rendered.bitmap);
     this.options.audio(
       this.state,
       this.sizing ||
@@ -249,7 +252,12 @@ class ArcadeTerminal {
         const pets = ["trex", "dog", "cow", "duck", "sixseven"];
         this.state.pet = pets[(pets.indexOf(this.state.pet) + 1) % pets.length];
         this.state.petFire = 0;
-        if (this.state.petCells) return this.select(this.state.mode);
+        if (
+          this.state.petCells ||
+          this.state.petBraille ||
+          this.state.petBitmap
+        )
+          return this.select(this.state.mode);
       }
       if (key === "s" || key === "S") {
         this.state.pixelSize = 1;

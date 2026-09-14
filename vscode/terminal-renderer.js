@@ -1,6 +1,8 @@
 "use strict";
 const E = require("./media/engine");
 const pets = require("./pet-scene");
+const { braille } = require("./terminal-pixels");
+const sprites = require("./media/pets");
 const { palette, contrast } = require("./terminal-theme");
 const colors = {
   I: "#8bd5ef",
@@ -74,7 +76,8 @@ function render(state, dimensions, frame = 0, suspended = false, theme) {
     text(0, rows - 2, "m hide  p pause  r restart  M music", BORDER);
     text(0, rows - 1, "Tab menu  ? controls  q quit", BORDER);
   }
-  let playable = true;
+  let playable = true,
+    bitmap;
   if (mode === "tetris" || mode === "duel") {
     const dual = mode === "duel",
       wide = rows >= 26 && cols >= (dual ? 84 : 42);
@@ -186,7 +189,9 @@ function render(state, dimensions, frame = 0, suspended = false, theme) {
     const separatorColumn = cols - menu.width;
     const sceneColumns = state.petCells
       ? Math.floor((separatorColumn - 1) / 2) + 2
-      : separatorColumn;
+      : state.petBraille || state.petBitmap
+        ? (separatorColumn - 1) * 2 + 2
+        : separatorColumn;
     const actor = pets.pose(
       state.pet || "trex",
       sceneColumns,
@@ -197,14 +202,41 @@ function render(state, dimensions, frame = 0, suspended = false, theme) {
     );
     const neededColumns = Math.max(
       28,
-      actor.width * (state.petCells ? 2 : 1) +
+      Math.ceil(
+        actor.width *
+          (state.petCells ? 2 : state.petBraille || state.petBitmap ? 0.5 : 1),
+      ) +
         menu.width +
         (state.petCells ? 3 : 2),
     );
     playable = cols >= neededColumns && rows >= height;
     if (playable) {
       const scene = pets.scene(state, sceneColumns, state.petFrame ?? frame);
-      pixels(scene.grid, 1, rows - height, 1, state.petCells);
+      if (state.petBraille) {
+        const coat = {
+          trex: "g",
+          dog: "G",
+          cow: "D",
+          duck: "y",
+          sixseven: "r",
+        };
+        braille(
+          scene.grid,
+          contrast(sprites.palette[coat[state.pet]] || "#8fbc62", BG, 4.5),
+        ).forEach((line, y) =>
+          line.forEach((cell, x) =>
+            put(1 + x, rows - height + y, cell.ch, cell.fg),
+          ),
+        );
+      } else if (state.petBitmap) {
+        bitmap = {
+          grid: scene.grid,
+          row: rows - height,
+          col: 1,
+          columns: separatorColumn - 1,
+          rows: height,
+        };
+      } else pixels(scene.grid, 1, rows - height, 1, state.petCells);
       for (let y = 0; y < height; y++)
         put(separatorColumn, rows - height + y, "│", ui.separator);
       menu.lines.forEach((line, y) =>
@@ -247,6 +279,6 @@ function render(state, dimensions, frame = 0, suspended = false, theme) {
     }
     return line + "\x1b[0m";
   });
-  return { lines, playable };
+  return { lines, playable, bitmap };
 }
 module.exports = { render };
